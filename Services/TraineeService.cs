@@ -23,7 +23,7 @@ public class TraineeService : ITraineeService
 
         };
     }
-    private static int nextId=0;
+    // private static int nextId=0;
     // private static List<Trainee> trainees = new List<Trainee>();
 
     public async Task<List<TraineeResponseDTO>> GetAll (string search) {
@@ -64,18 +64,18 @@ public class TraineeService : ITraineeService
         try
         {
              var newTrainee = new Trainee {
-            Id=nextId+1,
+            // Id=nextId+1,
             FirstName=traineedto.FirstName,
             LastName=traineedto.LastName,
             Email=traineedto.Email,
             TechStack=traineedto.TechStack,
             Status=traineedto.Status,
-            CreatedDate=DateTime.Now
+            CreatedDate=DateTime.Now,
+            UpdatedDate=DateTime.Now
         };
         
         await _context.Trainees.AddAsync(newTrainee);
         await _context.SaveChangesAsync();
-        nextId+=1;
         return MapTraineetoDTO(newTrainee);
         }
         catch (Exception e)
@@ -111,7 +111,7 @@ public class TraineeService : ITraineeService
     public async Task<bool> Delete(int Id){
         try
         {
-             var atrainee = _context.Trainees.Where(t=>t.Id==Id).FirstOrDefault();
+             Trainee atrainee = _context.Trainees.Where(t=>t.Id==Id).FirstOrDefault();
         if (atrainee == null) return false;
 
        _context.Trainees.Remove(atrainee);

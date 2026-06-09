@@ -104,7 +104,7 @@ public class TraineeListController : ControllerBase
             return StatusCode(500,new ApiResponse<bool>
         {
             success=true,
-            message="Trainee Not found",
+            message="Something went wrong",
             Data= false,
         });
         }

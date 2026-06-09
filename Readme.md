@@ -4,15 +4,42 @@ A Trainee management system API to manage all trainee records by performing CRUD
 
 ## Tech Stack
 
-ASP.NET, OpenAPI / Swagger, EF Core
+ASP.NET, OpenAPI / Swagger, EF Core, MySQL
 
 
 ## How to Run
+
 
 Go to the project directory. First install all required packages.
 ```bash
   dotnet restore
 ```
+
+Now Initailize MySQL by adding connection string in either the user secret or in appsettings.json(not reccomended)
+Create a DB Context and add below in program.cs
+
+```
+builder.Services.AddDbContext<ApiContext>( options =>{
+    options.UseMySQL(connectionString);         
+});
+```
+Once MySQL is configured we will have to migrate the existing models into the database 
+
+Firstly install the dotnet ef tool
+```
+dotnet tool install --global dotnet-ef
+```
+Now run the first migration
+```
+dotnet ef migrations add InitialCreate
+```
+Now we can let EF create the database and the table we require using the following
+```
+dotnet ef database update
+```
+Now the setup for the databse is completed
+
+
 To launch the project in development.
 ```bash
  dotnet run --launch-profile https    

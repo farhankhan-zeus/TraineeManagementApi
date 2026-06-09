@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace TraineeManagementApi.Models;
 
+[Table("Trainees")]
 public class Trainee
 {
     public int Id {get ; set ; }

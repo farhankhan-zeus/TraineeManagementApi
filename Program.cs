@@ -5,14 +5,13 @@ using TraineeManagementApi.Context;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection String not found");
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApiContext>( options =>{
-    options.UseInMemoryDatabase("TraineeManagementInMemoryDb");
-           
-        
+    options.UseMySQL(connectionString);         
 });
 builder.Services.AddScoped<ITraineeService,TraineeService>();
 var app = builder.Build();
