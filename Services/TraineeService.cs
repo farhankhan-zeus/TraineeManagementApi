@@ -18,7 +18,7 @@ public class TraineeService : ITraineeService
             LastName=trainee.LastName,
             Email=trainee.Email,
             TechStack=trainee.TechStack,
-            Status=trainee.Status,
+            Status = trainee.Status,
            
 
         };
@@ -63,6 +63,7 @@ public class TraineeService : ITraineeService
     public async Task<TraineeResponseDTO> AddTrainee(CreateTraineeRequestDTO traineedto){
         try
         {
+            Console.WriteLine(traineedto.FirstName);
              var newTrainee = new Trainee {
             // Id=nextId+1,
             FirstName=traineedto.FirstName,

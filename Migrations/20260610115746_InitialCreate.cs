@@ -21,8 +21,8 @@ namespace TraineeManagementApi.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    FirstName = table.Column<string>(type: "longtext", nullable: false),
-                    LastName = table.Column<string>(type: "longtext", nullable: false),
+                    FirstName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "longtext", nullable: false),
                     TechStack = table.Column<string>(type: "longtext", nullable: false),
                     Status = table.Column<string>(type: "longtext", nullable: false),
@@ -34,6 +34,31 @@ namespace TraineeManagementApi.Migrations
                     table.PrimaryKey("PK_Trainees", x => x.Id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Username = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "longtext", nullable: false),
+                    Passwordhash = table.Column<string>(type: "longtext", nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
+                table: "Users",
+                column: "Username",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -41,6 +66,9 @@ namespace TraineeManagementApi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Trainees");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

@@ -1,4 +1,5 @@
 namespace TraineeManagementApi.DTO;
+using TraineeManagementApi.Models;
 using System.ComponentModel.DataAnnotations;
 
 public class TraineeResponseDTO
@@ -15,7 +16,7 @@ public class TraineeResponseDTO
     public required string Email {get ; set ;}
     [Required]
     public required string TechStack {get ; set ;}
-    [Required]
+   
     public required string Status {get ; set ;}
     // public DateTime CreatedDate {get ; set ;}
     // public DateTime UpdatedDate {get ; set ;}
