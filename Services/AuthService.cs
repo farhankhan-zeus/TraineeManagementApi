@@ -17,10 +17,12 @@ public class AuthService : IAuthService
     private readonly ApiContext _context;
     private readonly IConfiguration _config;
     private readonly int _expiresIn;
-    public AuthService(ApiContext context , IConfiguration config)
+    private readonly ILogger<AuthService> _logger;
+    public AuthService(ApiContext context , IConfiguration config, ILogger<AuthService> logger)
     {
         _context = context;
         _config = config;
+        _logger=logger;
         _expiresIn = Convert.ToInt32(_config["Jwt:expiresIn"]);
     }
     private UserDTO MapToUserDTO(User user)
@@ -79,11 +81,12 @@ public class AuthService : IAuthService
 
 
                 };
+                _logger.LogInformation($"User ${loginrequest.Username} Logged In",loginrequest.Username);
                 return loginResponse;
             }
                 else
                 {
-                    
+                    _logger.LogInformation($"User ${loginrequest.Username} Loggin Failed",loginrequest.Username);
             return new LoginResponseDTO
             {
                 success=false,      

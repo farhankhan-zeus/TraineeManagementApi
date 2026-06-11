@@ -1,10 +1,11 @@
 
 using TraineeManagementApi.DTO;
+using TraineeManagementApi.Models;
 
 namespace TraineeManagementApi.Services;
 
 public interface ITraineeService{
-    Task<List<TraineeResponseDTO>> GetAll (string search);
+    Task<PagedResponse<TraineeResponseDTO>> GetAll (QuertFilter filter  ,CancellationToken cancellationToken);
 
     Task<TraineeResponseDTO> GetById ( int Id);
 

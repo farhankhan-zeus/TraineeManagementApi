@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.DTO;
 using TraineeManagementApi.Services;
+using Microsoft.AspNetCore.Authorization;
 namespace TraineeManagementApi.Controllers;
 
 [ApiController]
@@ -10,9 +11,11 @@ namespace TraineeManagementApi.Controllers;
 public class TraineeListController : ControllerBase
 {   
     private readonly ITraineeService _traineeservice;
+    private readonly ILogger<TraineeListController> _logger;
 
-    public TraineeListController(ITraineeService traineeservice){
+    public TraineeListController(ITraineeService traineeservice, ILogger<TraineeListController> logger){
         _traineeservice = traineeservice;
+        _logger = logger;
     }
     
 
@@ -20,32 +23,34 @@ public class TraineeListController : ControllerBase
 
     
     [HttpGet]
-     public async Task<IActionResult> GetAll(string search="")
+    [Authorize]
+     public async Task<IActionResult> GetAll([FromQuery] QuertFilter filter ,CancellationToken cancellationToken)
     {
         // return trainees.Select(MapTraineetoDTO).ToList();
         try
         {
-              var result= await _traineeservice.GetAll(search);
+              var result= await _traineeservice.GetAll(filter,cancellationToken);
        
-        return Ok(new ApiResponse<List<TraineeResponseDTO>>
+        return Ok(new ApiResponse<PagedResponse<TraineeResponseDTO>>
         {
             success=true,
             message="Successfull",
             Data= result,
         });
         }
-        catch
+        catch(Exception  e)
         {
             return StatusCode(500,new ApiResponse<bool>
         {
             success=true,
-            message="Trainee Not found",
+            message=e.Message +"Internal server Error",
             Data= false,
         });
         }
     }
 
-    [HttpGet("{Id:int}")]
+    [HttpGet("{Id:int}")]    
+    [Authorize]
     public async  Task<IActionResult> GetById(int Id)
     {
         // return MapTraineetoDTO(trainees.FirstOrDefault(p=>p.Id==Id));
@@ -74,6 +79,7 @@ public class TraineeListController : ControllerBase
 
 
     [HttpPost]
+    [Authorize]
     public async  Task<IActionResult> AddTrainee(CreateTraineeRequestDTO traineedto)
     {
         // var newTrainee = new Trainee {
@@ -112,6 +118,7 @@ public class TraineeListController : ControllerBase
 
 
     [HttpPut("{Id:int}")]
+    [Authorize]
     public async  Task<IActionResult> UpdateTrainee(int Id, UpdateTraineeRequestDTO updatedTraineedto)
     {
         //     var atrainee = trainees.FirstOrDefault(p => p.Id == Id);
@@ -156,6 +163,7 @@ public class TraineeListController : ControllerBase
     }
 
     [HttpDelete("{Id:int}")]
+    [Authorize]
     public async  Task<IActionResult> Delete(int Id)
     {
         //     var atrainee = trainees.FirstOrDefault(p => p.Id == Id);

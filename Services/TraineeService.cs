@@ -3,13 +3,18 @@ using TraineeManagementApi.DTO;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Context;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using TraineeManagementApi.utils;
+using Microsoft.VisualBasic;
 namespace TraineeManagementApi.Services;
 
 public class TraineeService : ITraineeService 
 {
     private readonly ApiContext _context;
-    public TraineeService( ApiContext context){
+    private readonly ILogger<TraineeService> _logger;
+    public TraineeService( ApiContext context, ILogger<TraineeService> logger){
         _context=context;
+        _logger =logger;
     }
       private TraineeResponseDTO MapTraineetoDTO (Trainee trainee){
         return new TraineeResponseDTO{
@@ -23,23 +28,41 @@ public class TraineeService : ITraineeService
 
         };
     }
+    
+    
     // private static int nextId=0;
     // private static List<Trainee> trainees = new List<Trainee>();
 
-    public async Task<List<TraineeResponseDTO>> GetAll (string search) {
+    public async Task<PagedResponse<TraineeResponseDTO>> GetAll (QuertFilter filter, CancellationToken cancellationToken) {
         //  return trainees.Select(MapTraineetoDTO).ToList();
         try
         {
-        var result = _context.Trainees.Select(MapTraineetoDTO);
-        if(search != "")
+       
+        
+        var query = _context.Trainees.AsQueryable();
+            if (filter.Search !=null)
+            {
+        query = query.ApplySearch(filter.Search);
+            }
+            if (filter.Status != null)
+            {                
+        query= query.ApplyStatusFilter(filter.Status);
+            }
+        var trainees =  query.ApplyPagination(filter.PageNumber,filter.PageSize).Select(MapTraineetoDTO).ToList();
+        var totalRecords = await query.CountAsync(cancellationToken);
+        return new PagedResponse<TraineeResponseDTO>
         {
-            var query = result.Where(t=> t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search));
-            return query.ToList();
-        }
-        return result.ToList();
+            Data= trainees,
+            PageNumber=filter.PageNumber,
+            PageSize=filter.PageSize,
+            TotalRecords=totalRecords,
+            TotalPages = (int)Math.Ceiling(totalRecords / (double) filter.PageSize)
+
+        };
         }
         catch(Exception e)
         {
+            _logger.LogError($"failed to fetch Trainees");
             throw new Exception("Error getting the Trainees",e);
         };
     }
@@ -56,6 +79,7 @@ public class TraineeService : ITraineeService
         }
         catch(Exception e)
         {
+            _logger.LogError($"failed to fetch Trainee Id:{Id}",Id);
             throw new Exception("Error getting the Trainee",e);
         };
     }
@@ -81,7 +105,7 @@ public class TraineeService : ITraineeService
         }
         catch (Exception e)
         {
-            
+            _logger.LogWarning($"Adding trainee failed");
             throw new Exception("Error adding the trainee",e);
         };
     }
@@ -104,7 +128,7 @@ public class TraineeService : ITraineeService
         }
         catch (Exception e)
         {
-            
+            _logger.LogWarning($"Failed to update trainee Id:{Id}");
             throw new Exception("Error updating the trainee",e);
         };
     }
@@ -121,7 +145,7 @@ public class TraineeService : ITraineeService
         }
         catch (Exception e)
         {
-            
+            _logger.LogWarning($"Delete failed for Id: {Id}");
             throw new Exception("Error deleting the trainee",e);
         };
     } 

@@ -6,12 +6,24 @@ using TraineeManagementApi.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+string MyAllowSpecificOrigins ="_myAllowedSpecificOrigins";
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy  =>
+                      {
+                          policy.WithOrigins("http://localhost:3000",
+                                              "http://localhost:5173")
+                                .AllowCredentials();
+                      });
+});
 
 // Add services to the container.
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection String not found");
-
-builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApiContext>( options =>{
@@ -27,9 +39,6 @@ builder.Services.AddDbContext<ApiContext>( options =>{
                 Role= RoleType.Admin,
                 CreatedDate= DateTime.Now,
                 UpdatedDate=DateTime.Now
-
-
-
             };
             ApiContext.Set<User>().Add(newUser);
             ApiContext.SaveChanges();
@@ -37,8 +46,13 @@ builder.Services.AddDbContext<ApiContext>( options =>{
         ;
     });        
 });
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+builder.Services.AddControllers();
 builder.Services.AddScoped<ITraineeService,TraineeService>();
 builder.Services.AddScoped<IAuthService,AuthService>();
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -59,7 +73,11 @@ builder.Services.AddAuthentication(options =>
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
             };
         });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -71,10 +89,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors();
 app.UseAuthentication();
+app.UseAuthorization();
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
 
 app.MapControllers();
 
