@@ -14,9 +14,7 @@ namespace TraineeManagementApi.Models;
 public class User
 {
     [Key]
-   [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
-    public int Id {get ; set ; }
+     public  Guid Id {get ; set ; }= Guid.NewGuid();
     [Required]   
      [MaxLength(50,ErrorMessage="Username should maximum be 50 characaters")]
      [MinLength(5,ErrorMessage="Username should minimum be 5 characaters")]
@@ -28,8 +26,8 @@ public class User
     public required string Email {get ; set ;}
     [Required]
     public required string Passwordhash {get ; set ;}
-    [EnumDataType(typeof(RoleType),ErrorMessage ="Invalid Role")]
-    public required RoleType Role{get ; set ;}
+    [Required]
+    public required string Role{get ; set ;}
     public DateTime CreatedDate {get ; set ;}
     public DateTime UpdatedDate {get ; set ;}
     

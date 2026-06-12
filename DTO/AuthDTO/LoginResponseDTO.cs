@@ -8,10 +8,10 @@ namespace TraineeManagementApi.DTO.AuthDTO;
 
 {
     [Required]
-    public required bool success {get ; set ;}
+    public required bool Success {get ; set ;}
 
 
-    public  string? token {get ; set ;}
+    public  string? Token {get ; set ;}
 
     public int? expiresIn {get ; set ;}
 

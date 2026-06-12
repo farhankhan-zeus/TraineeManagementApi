@@ -9,6 +9,8 @@ using TraineeManagementApi.DTO;
 using TraineeManagementApi.DTO.AuthDTO;
 using TraineeManagementApi.Models;
 
+using TraineeManagementApi.Services.Interfaces;
+
 using TraineeManagementApi.utils;
 
 namespace TraineeManagementApi.Services{
@@ -36,7 +38,7 @@ public class AuthService : IAuthService
         };
     }
     
-    private string generateJWT(string Username,int Id,int Role )
+    private string generateJWT(string Username,Guid Id,string Role )
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SecretKey"]!));
     var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -44,7 +46,7 @@ public class AuthService : IAuthService
 {
     new Claim(ClaimTypes.NameIdentifier,  Convert.ToString(Id)),
     new Claim(ClaimTypes.Name, Username!),
-    new Claim(ClaimTypes.Role, Convert.ToString(Role!))
+    new Claim(ClaimTypes.Role, Role)
 };
 
     var token = new JwtSecurityToken(
@@ -74,8 +76,8 @@ public class AuthService : IAuthService
                 UserDTO validuser=MapToUserDTO(user);
                 LoginResponseDTO loginResponse = new LoginResponseDTO
                 {
-                    success=true,
-                    token =generateJWT(user.Username,user.Id,Convert.ToInt32(user.Role)),
+                    Success=true,
+                    Token =generateJWT(user.Username,user.Id,user.Role),
                     expiresIn=_expiresIn,
                     User=validuser,
 
@@ -89,7 +91,7 @@ public class AuthService : IAuthService
                     _logger.LogInformation($"User ${loginrequest.Username} Loggin Failed",loginrequest.Username);
             return new LoginResponseDTO
             {
-                success=false,      
+                Success=false,      
                 User=MapToUserDTO(user)              
             };
                 }

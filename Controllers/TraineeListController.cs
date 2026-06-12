@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.Models;
-using TraineeManagementApi.DTO;
+using TraineeManagementApi.DTO.TraineeDTO;
 using TraineeManagementApi.Services;
+using TraineeManagementApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 namespace TraineeManagementApi.Controllers;
 
@@ -11,19 +12,19 @@ namespace TraineeManagementApi.Controllers;
 public class TraineeListController : ControllerBase
 {   
     private readonly ITraineeService _traineeservice;
-    private readonly ILogger<TraineeListController> _logger;
+    // private readonly ILogger<TraineeListController> _logger;
 
-    public TraineeListController(ITraineeService traineeservice, ILogger<TraineeListController> logger){
+    public TraineeListController(ITraineeService traineeservice){
         _traineeservice = traineeservice;
-        _logger = logger;
+        // _logger = logger;
     }
     
 
   
 
     
-    [HttpGet]
     [Authorize]
+    [HttpGet]
      public async Task<IActionResult> GetAll([FromQuery] QuertFilter filter ,CancellationToken cancellationToken)
     {
         // return trainees.Select(MapTraineetoDTO).ToList();
@@ -40,6 +41,7 @@ public class TraineeListController : ControllerBase
         }
         catch(Exception  e)
         {
+           
             return StatusCode(500,new ApiResponse<bool>
         {
             success=true,
@@ -49,9 +51,9 @@ public class TraineeListController : ControllerBase
         }
     }
 
-    [HttpGet("{Id:int}")]    
     [Authorize]
-    public async  Task<IActionResult> GetById(int Id)
+    [HttpGet("{Id:guid}")]    
+    public async  Task<IActionResult> GetById(Guid Id)
     {
         // return MapTraineetoDTO(trainees.FirstOrDefault(p=>p.Id==Id));
         try
@@ -68,6 +70,7 @@ public class TraineeListController : ControllerBase
         }
         catch
         {
+            
             return StatusCode(500,new ApiResponse<bool>
         {
             success=true,
@@ -78,9 +81,9 @@ public class TraineeListController : ControllerBase
     }
 
 
-    [HttpPost]
-    [Authorize]
-    public async  Task<IActionResult> AddTrainee(CreateTraineeRequestDTO traineedto)
+        [Authorize]
+        [HttpPost]
+    public async  Task<IActionResult> AddTrainee(CreateorUpdateTraineeRequestDTO traineedto)
     {
         // var newTrainee = new Trainee {
         //     Id=nextId+1,
@@ -117,9 +120,9 @@ public class TraineeListController : ControllerBase
     }  
 
 
-    [HttpPut("{Id:int}")]
     [Authorize]
-    public async  Task<IActionResult> UpdateTrainee(int Id, UpdateTraineeRequestDTO updatedTraineedto)
+    [HttpPut("{Id:guid}")]
+    public async  Task<IActionResult> UpdateTrainee(Guid Id, CreateorUpdateTraineeRequestDTO updatedTraineedto)
     {
         //     var atrainee = trainees.FirstOrDefault(p => p.Id == Id);
         //     if (atrainee == null) return null;
@@ -162,9 +165,9 @@ public class TraineeListController : ControllerBase
         }
     }
 
-    [HttpDelete("{Id:int}")]
     [Authorize]
-    public async  Task<IActionResult> Delete(int Id)
+    [HttpDelete("{Id:guid}")]
+    public async  Task<IActionResult> Delete(Guid Id)
     {
         //     var atrainee = trainees.FirstOrDefault(p => p.Id == Id);
         //     if (atrainee == null) return false;

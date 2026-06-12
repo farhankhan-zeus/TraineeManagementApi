@@ -8,7 +8,7 @@ namespace TraineeManagementApi.DTO;
 
 {
     [Required]
-    public required int Id {get ; set ;}
+    public required Guid Id {get ; set ;} =Guid.NewGuid();
 
 
     [Required(ErrorMessage ="Username is required")]
@@ -19,7 +19,7 @@ namespace TraineeManagementApi.DTO;
     public required string Email {get ; set ;}
 
     [EnumDataType(typeof(RoleType),ErrorMessage ="Invalid Role")]
-    public required RoleType Role {get ; set ;}
+    public required string Role {get ; set ;}
  
 
 };

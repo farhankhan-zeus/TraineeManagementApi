@@ -1,4 +1,5 @@
 using TraineeManagementApi.Services;
+using TraineeManagementApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Context;
@@ -36,7 +37,7 @@ builder.Services.AddDbContext<ApiContext>( options =>{
                 Username="admin",
                 Email="admin@gmail.com",
                 Passwordhash= PasswordHasher.Hashpassword("admin@123"),
-                Role= RoleType.Admin,
+                Role= "Admin",
                 CreatedDate= DateTime.Now,
                 UpdatedDate=DateTime.Now
             };
@@ -51,8 +52,9 @@ builder.Logging.AddConsole();
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<ITraineeService,TraineeService>();
-builder.Services.AddScoped<IAuthService,AuthService>();
-
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IMentorService,MentorService>();
+builder.Services.AddScoped<ILearningTaskService,LearningTaskService>();
 
 builder.Services.AddAuthentication(options =>
 {

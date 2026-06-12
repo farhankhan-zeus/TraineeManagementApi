@@ -1,10 +1,10 @@
-namespace TraineeManagementApi.DTO;
 using TraineeManagementApi.Models;
 using System.ComponentModel.DataAnnotations;
+namespace TraineeManagementApi.DTO.TraineeDTO;
 
 public class TraineeResponseDTO
 {
-    public int Id {get ; set ; }
+    public Guid Id {get ; set ; } 
     [Required]
     
     public  required string FirstName {get ; set ;}

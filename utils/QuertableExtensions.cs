@@ -1,5 +1,4 @@
 
-using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using MySql.EntityFrameworkCore.Extensions;
 using TraineeManagementApi.Models;

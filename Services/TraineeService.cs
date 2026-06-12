@@ -1,11 +1,12 @@
 
-using TraineeManagementApi.DTO;
+using TraineeManagementApi.DTO.TraineeDTO;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Context;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using TraineeManagementApi.utils;
 using Microsoft.VisualBasic;
+using TraineeManagementApi.Services.Interfaces;
 namespace TraineeManagementApi.Services;
 
 public class TraineeService : ITraineeService 
@@ -67,7 +68,7 @@ public class TraineeService : ITraineeService
         };
     }
 
-    public async Task<TraineeResponseDTO> GetById ( int Id){
+    public async Task<TraineeResponseDTO> GetById ( Guid Id){
         // var result =trainees.FirstOrDefault(p=>p.Id==Id);
         try
         {
@@ -84,10 +85,10 @@ public class TraineeService : ITraineeService
         };
     }
 
-    public async Task<TraineeResponseDTO> AddTrainee(CreateTraineeRequestDTO traineedto){
+    public async Task<TraineeResponseDTO> AddTrainee(CreateorUpdateTraineeRequestDTO traineedto){
         try
         {
-            Console.WriteLine(traineedto.FirstName);
+  
              var newTrainee = new Trainee {
             // Id=nextId+1,
             FirstName=traineedto.FirstName,
@@ -110,7 +111,7 @@ public class TraineeService : ITraineeService
         };
     }
 
-    public async Task<TraineeResponseDTO> UpdateTrainee(int Id, UpdateTraineeRequestDTO updatedTraineedto){
+    public async Task<TraineeResponseDTO> UpdateTrainee(Guid Id, CreateorUpdateTraineeRequestDTO updatedTraineedto){
         try
         {
              var atrainee =   _context.Trainees.Where(t=>t.Id==Id).FirstOrDefault();
@@ -133,7 +134,7 @@ public class TraineeService : ITraineeService
         };
     }
 
-    public async Task<bool> Delete(int Id){
+    public async Task<bool> Delete(Guid Id){
         try
         {
              Trainee atrainee = _context.Trainees.Where(t=>t.Id==Id).FirstOrDefault();

@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagementApi.Models;
-namespace TraineeManagementApi.DTO
-{
+namespace TraineeManagementApi.DTO.TraineeDTO;
+
    
 
-    public class CreateTraineeRequestDTO
+    public class CreateorUpdateTraineeRequestDTO
     {
     [Required(ErrorMessage="First Name is required")]
     [MaxLength(50,ErrorMessage="First Name should maximum be 50 characaters")]
@@ -23,4 +23,3 @@ namespace TraineeManagementApi.DTO
     [EnumDataType(typeof(Traineestatus),ErrorMessage="Invalid Status")]
     public required  string Status {get ; set ;}
     }
-}

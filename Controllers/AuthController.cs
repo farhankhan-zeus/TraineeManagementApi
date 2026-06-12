@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.DTO;
 using TraineeManagementApi.Services;
+using TraineeManagementApi.Services.Interfaces;
 using TraineeManagementApi.DTO.AuthDTO;
 namespace TraineeManagementApi.Controllers;
+
 
 
 [ApiController]
@@ -26,7 +28,7 @@ public class AuthController : ControllerBase
             {
                 return NotFound();
             }
-            if (response.success == false)
+            if (response.Success == false)
             {
                 return BadRequest(new ApiResponse<Object>{success=false,message="Wrong Password",Data={}});
             }
@@ -41,7 +43,7 @@ public class AuthController : ControllerBase
         {
              return StatusCode(500,new ApiResponse<Object>
         {
-            success=true,
+            success=false,
             message= e.Message,
             Data= {},
         });
