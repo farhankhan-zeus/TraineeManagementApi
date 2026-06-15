@@ -7,6 +7,7 @@ using TraineeManagementApi.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 string MyAllowSpecificOrigins ="_myAllowedSpecificOrigins";
@@ -26,7 +27,6 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection String not found");
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApiContext>( options =>{
     options.UseMySQL(connectionString)
     .UseSeeding((ApiContext, _) =>
@@ -55,6 +55,9 @@ builder.Services.AddScoped<ITraineeService,TraineeService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMentorService,MentorService>();
 builder.Services.AddScoped<ILearningTaskService,LearningTaskService>();
+builder.Services.AddScoped<ITaskAssignmentService,TaskAssignmentService>();
+builder.Services.AddScoped<ISubmissionService,SubmissionService>();
+builder.Services.AddScoped<IReviewService,ReviewService>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -77,6 +80,21 @@ builder.Services.AddAuthentication(options =>
         });
 
 builder.Services.AddAuthorization();
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = ctx =>
+    {
+        ctx.ProblemDetails.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier;
+        ctx.ProblemDetails.Extensions["timestamp"] = DateTime.UtcNow;
+        ctx.ProblemDetails.Instance = $"{ctx.HttpContext.Request.Method} {ctx.HttpContext.Request.Path}";
+    };
+});
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<ApiKeySecuritySchemeTransformer>();
+});
 
 var app = builder.Build();
 
@@ -91,12 +109,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseExceptionHandler();
 app.UseCors();
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseHttpsRedirection();
-
-
 app.MapControllers();
 
 app.Run();

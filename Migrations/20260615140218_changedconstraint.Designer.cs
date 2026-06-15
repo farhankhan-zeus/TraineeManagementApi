@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TraineeManagementApi.Context;
 
@@ -10,9 +11,11 @@ using TraineeManagementApi.Context;
 namespace TraineeManagementApi.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    partial class ApiContextModelSnapshot : ModelSnapshot
+    [Migration("20260615140218_changedconstraint")]
+    partial class changedconstraint
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -133,10 +136,6 @@ namespace TraineeManagementApi.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.HasIndex("MentorId");
-
-                    b.HasIndex("SubmissionId");
-
                     b.ToTable("Review");
                 });
 
@@ -167,8 +166,6 @@ namespace TraineeManagementApi.Migrations
 
                     b.HasIndex("Id")
                         .IsUnique();
-
-                    b.HasIndex("TaskAssignmentId");
 
                     b.ToTable("Submission");
                 });
@@ -212,12 +209,6 @@ namespace TraineeManagementApi.Migrations
 
                     b.HasIndex("Id")
                         .IsUnique();
-
-                    b.HasIndex("LearningTaskId");
-
-                    b.HasIndex("MentorId");
-
-                    b.HasIndex("TraineeId");
 
                     b.ToTable("TaskAssignment");
                 });
@@ -299,63 +290,6 @@ namespace TraineeManagementApi.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("TraineeManagementApi.Models.Review", b =>
-                {
-                    b.HasOne("TraineeManagementApi.Models.Mentor", "Mentor")
-                        .WithMany()
-                        .HasForeignKey("MentorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TraineeManagementApi.Models.Submission", "Submission")
-                        .WithMany()
-                        .HasForeignKey("SubmissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Mentor");
-
-                    b.Navigation("Submission");
-                });
-
-            modelBuilder.Entity("TraineeManagementApi.Models.Submission", b =>
-                {
-                    b.HasOne("TraineeManagementApi.Models.TaskAssignment", "TaskAssignment")
-                        .WithMany()
-                        .HasForeignKey("TaskAssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TaskAssignment");
-                });
-
-            modelBuilder.Entity("TraineeManagementApi.Models.TaskAssignment", b =>
-                {
-                    b.HasOne("TraineeManagementApi.Models.LearningTask", "LearningTask")
-                        .WithMany()
-                        .HasForeignKey("LearningTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TraineeManagementApi.Models.Mentor", "Mentor")
-                        .WithMany()
-                        .HasForeignKey("MentorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TraineeManagementApi.Models.Trainee", "Trainee")
-                        .WithMany()
-                        .HasForeignKey("TraineeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LearningTask");
-
-                    b.Navigation("Mentor");
-
-                    b.Navigation("Trainee");
                 });
 #pragma warning restore 612, 618
         }
