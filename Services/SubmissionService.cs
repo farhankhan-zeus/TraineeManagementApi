@@ -39,7 +39,7 @@ public class SubmissionService : ISubmissionService
     public async Task<SubmissionResponseDTO> GetById(Guid Id)
     {
       
-            Submission? submission = (Submission?) _context.Submissions.Include(t=>t.TaskAssignment).Where(t=>t.Id==Id);
+            Submission? submission =  _context.Submissions.Include(t=>t.TaskAssignment).Where(t=>t.Id==Id).FirstOrDefault();
             if(submission == null)
             {
                 throw new NotFoundException("Submission",Id);

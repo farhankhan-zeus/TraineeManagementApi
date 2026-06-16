@@ -42,7 +42,7 @@ public class ReviewService : IReviewService
     public async Task<ReviewResponseDTO> GetById(Guid Id)
     {
        
-            Review? review = (Review?) _context.Reveiws.Include(t=>t.Mentor).Include(t=>t.Submission).Where(t=>t.Id==Id);
+            Review? review = (Review?) _context.Reveiws.Include(t=>t.Mentor).Include(t=>t.Submission).Where(t=>t.Id==Id).FirstOrDefault();
             if(review == null)
             {
                 throw new NotFoundException("Review",Id);
