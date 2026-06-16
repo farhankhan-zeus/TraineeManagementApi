@@ -20,7 +20,7 @@ public class Submission
 
     [Required]
     public  Guid TaskAssignmentId {get; set;}
-    public TaskAssignment TaskAssignment {get; set;} = null;
+    public TaskAssignment? TaskAssignment {get; set;} = null;
     
     [RegularExpression(@"^(https?:\/\/)(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$
 ",ErrorMessage ="Invalid Url")]

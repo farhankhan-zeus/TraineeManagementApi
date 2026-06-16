@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using TraineeManagementApi.DTO.TaskAssignmentDTO;
 using TraineeManagementApi.Models;
 namespace TraineeManagementApi.DTO.SubmissionDTO;
 public class SubmissionResponseDTO
@@ -8,6 +9,8 @@ public class SubmissionResponseDTO
     [Required]
    
     public required Guid TaskAssignmentId {get ; set ;}
+
+    public TaskAssignmentResponseDTO? TaskAssignment {get; set;}
 
     [Required]    
    [RegularExpression(@"^(https?:\/\/)(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$

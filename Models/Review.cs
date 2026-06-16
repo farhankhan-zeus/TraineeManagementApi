@@ -21,9 +21,9 @@ public class Review
 
     [Required]
     public  Guid SubmissionId {get; set;}
-    public  Submission Submission {get; set;} = null;
+    public  Submission? Submission {get; set;} = null;
     public  Guid MentorId {get; set;}
-    public Mentor Mentor {get; set;}= null;
+    public Mentor? Mentor {get; set;}= null;
     
     [Required]
     public required string Feedback {get; set;}

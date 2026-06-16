@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using TraineeManagementApi.Context;
 using TraineeManagementApi.DTO;
 using TraineeManagementApi.DTO.AuthDTO;
+using TraineeManagementApi.Exceptions;
 using TraineeManagementApi.Models;
 
 using TraineeManagementApi.Services.Interfaces;
@@ -64,11 +65,14 @@ public class AuthService : IAuthService
     public async Task<LoginResponseDTO> Login(LoginRequestDTO loginrequest)
     {
         // string hashedpassword=PasswordHasher.Hashpassword(loginrequest.Password);
-        try
-        {
+        
             var user = await _context.Users.Where(u=>u.Username== loginrequest.Username ).FirstOrDefaultAsync();
         
-            if(user == null) return null;
+            if(user == null)
+                {
+                    throw new NotFoundException("User",$"{loginrequest.Username}");
+                }
+                ;
             // Console.WriteLine(PasswordHasher.VerifyPassword(loginrequest.Password, user.Passwordhash));
             bool isverified =PasswordHasher.VerifyPassword(loginrequest.Password, user.Passwordhash);
             if (isverified)
@@ -96,11 +100,8 @@ public class AuthService : IAuthService
             };
                 }
            
-        }
-        catch(Exception e)
-        {
-            throw new Exception(e.Message);
-    };
+        
+        
 
     }
 }

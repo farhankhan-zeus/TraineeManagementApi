@@ -6,7 +6,7 @@ using TraineeManagementApi.DTO.TaskAssignmentDTO;
 using TraineeManagementApi.Exceptions;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Services.Interfaces;
-
+using TraineeManagementApi.utils;
 namespace TraineeManagementApi.Services;
 
 public class TaskAssignmentService : ITaskAssignmentService
@@ -20,64 +20,33 @@ public class TaskAssignmentService : ITaskAssignmentService
         _logger = logger;
     }
 
-    public TaskAssignmentResponseDTO MaptoTaskAssignmentResponse( TaskAssignment task)
+ 
+     public async Task<List<TaskAssignmentResponseDTO>> Getall()
     {
-        TaskAssignmentResponseDTO response=new TaskAssignmentResponseDTO{
-        Id = task.Id,
-        TraineeId=task.TraineeId,
-        MentorId = task.MentorId,
-        LearningTaskId = task.LearningTaskId,
-        Status = task.Status,
-        AssignDate= task.AssignDate,
-        DueDate= task.DueDate,
        
-
-    };
-        if(task.Remarks != null)
-        {
-            response.Remarks = task.Remarks;
-        }
-        return response;
-    }
-
-     public async Task<List<TaskAssignmentResponseDTO?>> Getall()
-    {
-        try
-        {
-            List<TaskAssignment>? tasks = await _context.TaskAssignments.Include(t=>t.Trainee).Include(t=>t.LearningTask).Include(t=>t.Mentor).ToListAsync();
+            List<TaskAssignment> tasks = await _context.TaskAssignments.Include(t=>t.Trainee).Include(t=>t.LearningTask).Include(t=>t.Mentor).ToListAsync();
             if(tasks.Count == 0)
             {
                 return [];
             }
-            List<TaskAssignmentResponseDTO?> result = tasks.Select(MaptoTaskAssignmentResponse).ToList();
+            List<TaskAssignmentResponseDTO> result = tasks.Select(ResponseDTOMapper.MaptoTaskAssignmentResponse).ToList();
             return result;
             
 
 
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning("Failed to get the tasks");
-            throw new Exception("Error getting the Tasks",e);
-        }
+       
     }
 
-    public async Task<TaskAssignmentResponseDTO?> GetById(Guid Id)
+    public async Task<TaskAssignmentResponseDTO> GetById(Guid Id)
     {
-        try
-        {
+       
             TaskAssignment? task = await _context.TaskAssignments.Include(t=>t.Trainee).Include(t=>t.LearningTask).Include(t=>t.Mentor).FirstOrDefaultAsync(ta => ta.Id == Id); 
             if(task == null)
             {
-                return null;
+                throw new NotFoundException("Task Assignment",Id);
             }
-            return MaptoTaskAssignmentResponse(task);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning($"failed to retrive mentor with Id: {Id}",Id);
-            throw new Exception("Failed to Retrive Mentor",e);
-        }
+            return ResponseDTOMapper.MaptoTaskAssignmentResponse(task);
+       
     }
 
     public async Task<TaskAssignmentResponseDTO> AddTask(CreateorUpdateTaskAssignmentRequestDTO task )
@@ -98,8 +67,6 @@ public class TaskAssignmentService : ITaskAssignmentService
             throw new NotFoundException("LearningTask",task.LearningTaskId);
         }
         
-        try
-        {
             TaskAssignment newTask = new TaskAssignment
             {
                 TraineeId = task.TraineeId,
@@ -117,45 +84,32 @@ public class TaskAssignmentService : ITaskAssignmentService
             }
             await _context.TaskAssignments.AddAsync(newTask);
             await _context.SaveChangesAsync();
-            return MaptoTaskAssignmentResponse(newTask);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning("Failed to add Task");
-            throw new Exception("Failed to add Task",e);
-        }
+            return ResponseDTOMapper.MaptoTaskAssignmentResponse(newTask);
+       
         
     }
 
-    public async Task<TaskAssignmentResponseDTO?> UpdateTask(Guid Id,CreateorUpdateTaskAssignmentRequestDTO task)
+    public async Task<TaskAssignmentResponseDTO> UpdateTask(Guid Id,CreateorUpdateTaskAssignmentRequestDTO task)
     {
-        try
-        {
+       
             TaskAssignment? newTask = await _context.TaskAssignments.FindAsync(Id);
             if(newTask == null)
             {
-                return null;
+                throw new NotFoundException("Task Assignment",Id);
             }
                 
                 newTask.Status= task.Status;                
             newTask.UpdatedDate = DateTime.Now;
 
             await _context.SaveChangesAsync();
-            return MaptoTaskAssignmentResponse(newTask);
+            return ResponseDTOMapper.MaptoTaskAssignmentResponse(newTask);
 
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning($"Failed to update Task with Id: {Id}",Id);
-            
-            throw new Exception("Failed to update Taskassignment",e);
-        }
+        
     }
 
-    public async Task<bool?> DeleteTask (Guid Id)
+    public async Task<bool> DeleteTask (Guid Id)
     {
-        try
-        {
+       
             TaskAssignment? task = await _context.TaskAssignments.FindAsync(Id);
             if(task== null)
             {
@@ -166,13 +120,7 @@ public class TaskAssignmentService : ITaskAssignmentService
             return true;
 
 
-        }
-        catch (Exception)
-        {   
-            _logger.LogWarning($"Failed to delete Task assignment with Id: {Id}",Id);
-            return false;
-           
-        }
+        
     }
 
 

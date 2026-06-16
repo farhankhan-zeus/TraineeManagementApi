@@ -29,9 +29,9 @@ public class TaskAssignment : IValidatableObject
     [Required]
     public Guid MentorId {get; set;}
       public Guid LearningTaskId {get; set;}
- public Trainee Trainee { get; set; } = null!;
-    public Mentor Mentor { get; set; } = null!;
-    public LearningTask LearningTask { get; set; } = null!;
+ public Trainee? Trainee { get; set; } = null!;
+    public Mentor? Mentor { get; set; } = null!;
+    public LearningTask? LearningTask { get; set; } = null!;
         // [Required]
       [Required]
       public required DateTime AssignDate {get; set;}

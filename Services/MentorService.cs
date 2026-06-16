@@ -3,8 +3,10 @@
 using Microsoft.EntityFrameworkCore;
 using TraineeManagementApi.Context;
 using TraineeManagementApi.DTO.MentorDTO;
+using TraineeManagementApi.Exceptions;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Services.Interfaces;
+using TraineeManagementApi.utils;
 
 namespace TraineeManagementApi.Services;
 
@@ -19,7 +21,7 @@ public class MentorService: IMentorService
         _logger = logger;
     }
 
-    private MentorResponseDTO MapMentorToDTO (Mentor mentor)
+    public  MentorResponseDTO MapMentorToDTO (Mentor mentor)
     {
         return new MentorResponseDTO
         {
@@ -33,50 +35,36 @@ public class MentorService: IMentorService
 
     }
 
-    public async Task<List<MentorResponseDTO?>> Getall()
+    public async Task<List<MentorResponseDTO>> Getall()
     {
-        try
-        {
-            List<Mentor>? mentors = await _context.Mentors.ToListAsync();
+      
+            List<Mentor> mentors = await _context.Mentors.ToListAsync();
             if(mentors.Count == 0)
             {
                 return [];
             }
-            List<MentorResponseDTO?> result = mentors.Select(MapMentorToDTO).ToList();
+            List<MentorResponseDTO> result = mentors.Select(ResponseDTOMapper.MapMentorToDTO).ToList();
             return result;
             
 
 
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning("Failed to get the mentors");
-            throw new Exception("Error getting the Mentors",e);
-        }
+       
     }
 
-    public async Task<MentorResponseDTO?> GetById(Guid Id)
+    public async Task<MentorResponseDTO> GetById(Guid Id)
     {
-        try
-        {
+        
             Mentor? mentee = await _context.Mentors.FindAsync(Id);
             if(mentee == null)
             {
-                return null;
+                throw new NotFoundException("Mentor",Id);
             }
-            return MapMentorToDTO(mentee);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning($"failed to retrive mentor with Id: {Id}",Id);
-            throw new Exception("Failed to Retrive Mentor",e);
-        }
+            return ResponseDTOMapper.MapMentorToDTO(mentee);
+        
     }
 
     public async Task<MentorResponseDTO> AddMentor(CreateorUpdateMentorRequestDTO mentee)
     {
-        try
-        {
             Mentor newMentee = new Mentor
             {
                 FirstName= mentee.FirstName,
@@ -89,24 +77,18 @@ public class MentorService: IMentorService
             };
             await _context.Mentors.AddAsync(newMentee);
             await _context.SaveChangesAsync();
-            return MapMentorToDTO(newMentee);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning("Failed to add Mentor");
-            throw new Exception("Failed to add Menotr",e);
-        }
+            return ResponseDTOMapper.MapMentorToDTO(newMentee);
+       
         
     }
 
-    public async Task<MentorResponseDTO?> UpdateMentor(Guid Id,CreateorUpdateMentorRequestDTO updatedmentee)
+    public async Task<MentorResponseDTO> UpdateMentor(Guid Id,CreateorUpdateMentorRequestDTO updatedmentee)
     {
-        try
-        {
+        
             Mentor? mentee = await _context.Mentors.FindAsync(Id);
             if(mentee == null)
             {
-                return null;
+                throw new NotFoundException("Mentor",Id);
             }
             mentee.FirstName = updatedmentee.FirstName;
             mentee.LastName = updatedmentee.LastName;
@@ -116,38 +98,25 @@ public class MentorService: IMentorService
             mentee.UpdatedDate = DateTime.Now;
 
             await _context.SaveChangesAsync();
-            return MapMentorToDTO(mentee);
+            return ResponseDTOMapper.MapMentorToDTO(mentee);
 
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning($"Failed to update Mentor with Id: {Id}",Id);
-            
-            throw new Exception("Failed to update Mentor",e);
-        }
+        
     }
 
-    public async Task<bool?> DeleteMentor (Guid Id)
+    public async Task<bool> DeleteMentor (Guid Id)
     {
-        try
-        {
+       
             Mentor? mentee = await _context.Mentors.FindAsync(Id);
             if(mentee== null)
             {
-                return null;
+                throw new NotFoundException("Mentor",Id);
             }
             _context.Mentors.Remove(mentee);
             await _context.SaveChangesAsync();
             return true;
 
 
-        }
-        catch (Exception)
-        {   
-            _logger.LogWarning($"Failed to delete mentor with Id: {Id}",Id);
-            return false;
-           
-        }
+        
     }
 
 

@@ -24,9 +24,8 @@ public class LearningTaskController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Getall()
     {
-        try
-        {
-            List<LearningTaskResponseDTO?> response = await _learningtaskservice.Getall();
+        
+            List<LearningTaskResponseDTO> response = await _learningtaskservice.Getall();
             _logger.LogInformation("Tasks fetched successfully");
             return Ok( new ApiResponse<List<LearningTaskResponseDTO?>>
             {
@@ -35,33 +34,15 @@ public class LearningTaskController : ControllerBase
                 Data = response
             });
             
-        }
-        catch (Exception)
-        {
-            return StatusCode(500,new ApiResponse<object>
-            {
-                success=false,
-                message="Internal Server Error",
-                Data={}
-            });
-        }
+       
     }
     [Authorize]
     [HttpGet("{Id:guid}")]
 
     public async Task<IActionResult> GetById (Guid Id)
     {
-        try{
-        var result = await _learningtaskservice.GetById(Id);
-        if(result == null)
-        {
-            return Ok( new ApiResponse<object>
-            {
-                success=true,
-                message="Data Fetched successfully",
-                Data = {}
-            });
-        }
+        
+        LearningTaskResponseDTO result = await _learningtaskservice.GetById(Id);
         _logger.LogInformation($"Learning Task with Id:{Id} fetched successfully",Id);
         return Ok( new ApiResponse<LearningTaskResponseDTO>
             {
@@ -69,24 +50,14 @@ public class LearningTaskController : ControllerBase
                 message="Data Fetched successfully",
                 Data = result
             });
-        }
-        catch( Exception )
-        {
-            return StatusCode(500,new ApiResponse<object>
-            {
-                success=false,
-                message="Internal Server Error",
-                Data={}
-            });
-        }
+        
 
     }
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> addLearningTask( CreateorUpdateLearningTaskRequestDTO task)
     {
-        try
-        {
+        
             LearningTaskResponseDTO response = await _learningtaskservice.AddTask(task);
             return Ok( new ApiResponse<LearningTaskResponseDTO>
             {
@@ -94,34 +65,14 @@ public class LearningTaskController : ControllerBase
                 message="Mentor added successfully",
                 Data=response
             });
-        }
-        catch (Exception)
-        {
-            
-            return StatusCode(500,new ApiResponse<object>
-            {
-                success=false,
-                message="Internal Server Error",
-                Data={}
-            });
-        }
+       
     }
 
     [Authorize]
     [HttpPut("{Id:guid}")]
     public async Task<IActionResult> updateLearningTask (Guid Id,CreateorUpdateLearningTaskRequestDTO task)
     {
-        LearningTaskResponseDTO? response = await _learningtaskservice.UpdateTask(Id, task);
-        if(response == null)
-        {
-            return NotFound(new ApiResponse<object>
-        {
-            success=false,
-            message="Mentor doesn't exist",
-            Data={}
-        });
-            
-        }
+        LearningTaskResponseDTO response = await _learningtaskservice.UpdateTask(Id, task);
         _logger.LogInformation($"Mentor with Id:{Id} updated successfully",Id);
         return Ok(new ApiResponse<LearningTaskResponseDTO>
         {
@@ -135,16 +86,9 @@ public class LearningTaskController : ControllerBase
     [HttpDelete("{Id:guid}")]
     public async Task<IActionResult> deleteLearningTask (Guid Id)
     {
-        bool? response = await  _learningtaskservice.DeleteTask(Id);
-        if(response == null)
-        {
-             return NotFound(new ApiResponse<object>
-        {
-            success=false,
-            message="Mentor doesn't exist",
-            Data={}
-        });
-        }
+        bool response = await  _learningtaskservice.DeleteTask(Id);
+        if(response) _logger.LogInformation($"Learning Task with Id: {Id} deleted",Id);
+    
         return NoContent();
     }
 

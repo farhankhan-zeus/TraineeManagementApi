@@ -21,8 +21,7 @@ public class AuthController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Login( LoginRequestDTO loginrequest)
     {
-        try
-        {
+        
             LoginResponseDTO? response =await _authService.Login(loginrequest);
             if (response== null)
             {
@@ -38,16 +37,7 @@ public class AuthController : ControllerBase
                 message="Login successful",
                 Data=response
             });
-        }
-        catch(Exception e)
-        {
-             return StatusCode(500,new ApiResponse<Object>
-        {
-            success=false,
-            message= e.Message,
-            Data= {},
-        });
-        }
+       
     }
 
 

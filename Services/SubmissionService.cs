@@ -6,6 +6,7 @@ using TraineeManagementApi.DTO.SubmissionDTO;
 using TraineeManagementApi.Exceptions;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Services.Interfaces;
+using TraineeManagementApi.utils;
 
 namespace TraineeManagementApi.Services;
 
@@ -20,73 +21,47 @@ public class SubmissionService : ISubmissionService
         _logger = logger;
     }
 
-    public SubmissionResponseDTO MaptoSubmissionResponse( Submission submit)
-    {
-        SubmissionResponseDTO response=new SubmissionResponseDTO{
-        Id = submit.Id,
-        TaskAssignmentId = submit.TaskAssignmentId,
-        SubmissionUrl = submit.SubmissionUrl,
-        SubmittedDate = submit.SubmittedDate,
-        Status = submit.Status,
+    
 
-    };
-        if(submit.Notes != null)
-        {
-            response.Notes = submit.Notes;
-        }
-        return response;
-    }
-
-     public async Task<List<SubmissionResponseDTO?>> Getall()
+     public async Task<List<SubmissionResponseDTO>> Getall()
     {
-        try
-        {
-            List<Submission>? submissions = await _context.Submissions.ToListAsync();
+       
+            List<Submission>? submissions = await _context.Submissions.Include(t=>t.TaskAssignment).ToListAsync();
             if(submissions.Count == 0)
             {
                 return [];
             }
-            List<SubmissionResponseDTO?> result =submissions.Select(MaptoSubmissionResponse).ToList();
+            List<SubmissionResponseDTO> result =submissions.Select(ResponseDTOMapper.MaptoSubmissionResponse).ToList();
             return result;
-            
 
-
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning("Failed to get the submissions");
-            throw new Exception("Error getting the submissions",e);
-        }
     }
 
-    public async Task<SubmissionResponseDTO?> GetById(Guid Id)
+    public async Task<SubmissionResponseDTO> GetById(Guid Id)
     {
-        try
-        {
-            Submission? submission = await _context.Submissions.FindAsync(Id);
+      
+            Submission? submission = (Submission?) _context.Submissions.Include(t=>t.TaskAssignment).Where(t=>t.Id==Id);
             if(submission == null)
             {
                 throw new NotFoundException("Submission",Id);
             }
-            return MaptoSubmissionResponse(submission);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning($"failed to retrive submission with Id: {Id}",Id);
-            throw new Exception("Failed to Retrive submission",e);
-        }
+            return ResponseDTOMapper.MaptoSubmissionResponse(submission);
+       
     }
 
     public async Task<SubmissionResponseDTO> AddSubmission(CreateorUpdateSubmissionRequestDTO submission)
        
         
     {
-        try
-        {
+       
         TaskAssignment? existtask = await _context.TaskAssignments.FindAsync(submission.TaskAssignmentId);
         if(existtask == null)
         {
             throw new NotFoundException("Task Assignment",submission.TaskAssignmentId);
+        }
+        Submission? existsubmint = (Submission?) _context.Submissions.Where(t=>t.TaskAssignmentId==submission.TaskAssignmentId);
+        if(existsubmint != null)
+        {
+            throw new BadRequestException("Submission already exist for this task");
         }
             Submission newsubmission = new Submission
             {
@@ -102,20 +77,14 @@ public class SubmissionService : ISubmissionService
             }
             await _context.Submissions.AddAsync(newsubmission);
             await _context.SaveChangesAsync();
-            return MaptoSubmissionResponse(newsubmission);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning("Failed to add submission");
-            throw new Exception("Failed to add submission",e);
-        }
+            return ResponseDTOMapper.MaptoSubmissionResponse(newsubmission);
+        
         
     }
 
-    public async Task<SubmissionResponseDTO?> UpdateSubmission(Guid Id,CreateorUpdateSubmissionRequestDTO submission)
+    public async Task<SubmissionResponseDTO> UpdateSubmission(Guid Id,CreateorUpdateSubmissionRequestDTO submission)
     {
-        try
-        {
+       
             Submission? existsubmission = await _context.Submissions.FindAsync(Id);
             if(existsubmission == null)
             {
@@ -134,15 +103,9 @@ public class SubmissionService : ISubmissionService
                existsubmission.Notes = submission.Notes;
             }
             await _context.SaveChangesAsync();
-            return MaptoSubmissionResponse(existsubmission);
+            return ResponseDTOMapper.MaptoSubmissionResponse(existsubmission);
 
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning($"Failed to update Task with Id: {Id}",Id);
-            
-            throw new Exception("Failed to update Taskassignment",e);
-        }
+       
     }
 
   

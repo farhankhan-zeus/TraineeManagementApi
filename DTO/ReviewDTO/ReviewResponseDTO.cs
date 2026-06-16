@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using TraineeManagementApi.DTO.MentorDTO;
+using TraineeManagementApi.DTO.SubmissionDTO;
 using TraineeManagementApi.Models;
 namespace TraineeManagementApi.DTO.ReviewDTO;
 public class ReviewResponseDTO
@@ -8,8 +10,12 @@ public class ReviewResponseDTO
     [Required]
    
     public required Guid SubmissionId {get ; set ;}
+
+    public SubmissionResponseDTO? Submission {get; set;}
     [Required]
     public required Guid MentorId {get ; set ;}
+
+    public MentorResponseDTO? Mentor {get; set;}
 
    
 

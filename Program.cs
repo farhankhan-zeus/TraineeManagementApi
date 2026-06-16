@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi;
+using TraineeManagement.Api.ExceptionMiddlewares;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 string MyAllowSpecificOrigins ="_myAllowedSpecificOrigins";
@@ -89,7 +90,7 @@ builder.Services.AddProblemDetails(options =>
         ctx.ProblemDetails.Instance = $"{ctx.HttpContext.Request.Method} {ctx.HttpContext.Request.Path}";
     };
 });
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 
 builder.Services.AddOpenApi(options =>
 {
@@ -109,9 +110,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseExceptionHandler();
-app.UseCors();
+
 app.UseHttpsRedirection();
+app.UseCors();
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

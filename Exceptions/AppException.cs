@@ -10,6 +10,13 @@ public abstract class AppException : Exception
         StatusCode = statusCode;
     }
 }
+public sealed class UnauthorizedException : AppException
+{
+    public UnauthorizedException(string message) : base(message, HttpStatusCode.Unauthorized)
+    {
+        
+    }
+}
 
 public sealed class NotFoundException : AppException
 {
@@ -31,6 +38,13 @@ public sealed class ConflictException : AppException
 {
     public ConflictException(string message)
         : base(message, HttpStatusCode.Conflict)
+    {
+    }
+}
+public sealed class JwtOperationException : Exception
+{
+    public JwtOperationException()
+        
     {
     }
 }
