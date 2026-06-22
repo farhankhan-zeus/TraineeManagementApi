@@ -11,8 +11,8 @@ using TraineeManagementApi.Context;
 namespace TraineeManagementApi.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20260616091204_touch")]
-    partial class touch
+    [Migration("20260619144757_removednavigation")]
+    partial class removednavigation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -176,6 +176,53 @@ namespace TraineeManagementApi.Migrations
                     b.ToTable("Submission");
                 });
 
+            modelBuilder.Entity("TraineeManagementApi.Models.SubmissionFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("SubmissionId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("UploadedById")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("checksum")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("generatedName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("orignalName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<long>("size")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("SubmissionId");
+
+                    b.ToTable("SubmissionFile");
+                });
+
             modelBuilder.Entity("TraineeManagementApi.Models.TaskAssignment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -332,6 +379,17 @@ namespace TraineeManagementApi.Migrations
                         .IsRequired();
 
                     b.Navigation("TaskAssignment");
+                });
+
+            modelBuilder.Entity("TraineeManagementApi.Models.SubmissionFile", b =>
+                {
+                    b.HasOne("TraineeManagementApi.Models.Submission", "Submission")
+                        .WithMany()
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Submission");
                 });
 
             modelBuilder.Entity("TraineeManagementApi.Models.TaskAssignment", b =>

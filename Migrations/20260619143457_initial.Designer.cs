@@ -11,8 +11,8 @@ using TraineeManagementApi.Context;
 namespace TraineeManagementApi.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20260615134026_newModels")]
-    partial class newModels
+    [Migration("20260619143457_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -136,6 +136,10 @@ namespace TraineeManagementApi.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
+                    b.HasIndex("MentorId");
+
+                    b.HasIndex("SubmissionId");
+
                     b.ToTable("Review");
                 });
 
@@ -167,7 +171,58 @@ namespace TraineeManagementApi.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
+                    b.HasIndex("TaskAssignmentId");
+
                     b.ToTable("Submission");
+                });
+
+            modelBuilder.Entity("TraineeManagementApi.Models.SubmissionFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("SubmissionId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("UploadedById")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("checksum")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("generatedName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("orignalName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<long>("size")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("SubmissionId");
+
+                    b.HasIndex("UploadedById");
+
+                    b.ToTable("SubmissionFile");
                 });
 
             modelBuilder.Entity("TraineeManagementApi.Models.TaskAssignment", b =>
@@ -209,6 +264,12 @@ namespace TraineeManagementApi.Migrations
 
                     b.HasIndex("Id")
                         .IsUnique();
+
+                    b.HasIndex("LearningTaskId");
+
+                    b.HasIndex("MentorId");
+
+                    b.HasIndex("TraineeId");
 
                     b.ToTable("TaskAssignment");
                 });
@@ -290,6 +351,82 @@ namespace TraineeManagementApi.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TraineeManagementApi.Models.Review", b =>
+                {
+                    b.HasOne("TraineeManagementApi.Models.Mentor", "Mentor")
+                        .WithMany()
+                        .HasForeignKey("MentorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TraineeManagementApi.Models.Submission", "Submission")
+                        .WithMany()
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mentor");
+
+                    b.Navigation("Submission");
+                });
+
+            modelBuilder.Entity("TraineeManagementApi.Models.Submission", b =>
+                {
+                    b.HasOne("TraineeManagementApi.Models.TaskAssignment", "TaskAssignment")
+                        .WithMany()
+                        .HasForeignKey("TaskAssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TaskAssignment");
+                });
+
+            modelBuilder.Entity("TraineeManagementApi.Models.SubmissionFile", b =>
+                {
+                    b.HasOne("TraineeManagementApi.Models.Submission", "Submission")
+                        .WithMany()
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TraineeManagementApi.Models.Trainee", "UploadedBy")
+                        .WithMany()
+                        .HasForeignKey("UploadedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Submission");
+
+                    b.Navigation("UploadedBy");
+                });
+
+            modelBuilder.Entity("TraineeManagementApi.Models.TaskAssignment", b =>
+                {
+                    b.HasOne("TraineeManagementApi.Models.LearningTask", "LearningTask")
+                        .WithMany()
+                        .HasForeignKey("LearningTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TraineeManagementApi.Models.Mentor", "Mentor")
+                        .WithMany()
+                        .HasForeignKey("MentorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TraineeManagementApi.Models.Trainee", "Trainee")
+                        .WithMany()
+                        .HasForeignKey("TraineeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LearningTask");
+
+                    b.Navigation("Mentor");
+
+                    b.Navigation("Trainee");
                 });
 #pragma warning restore 612, 618
         }

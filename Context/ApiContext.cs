@@ -21,6 +21,7 @@ namespace TraineeManagementApi.Context;
 
         public DbSet <Review> Reveiws {get; set;}
         
+        public DbSet <SubmissionFile> SubmissionFiles {get; set;}
     }
 
 

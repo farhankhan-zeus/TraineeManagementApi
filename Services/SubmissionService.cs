@@ -58,7 +58,7 @@ public class SubmissionService : ISubmissionService
         {
             throw new NotFoundException("Task Assignment",submission.TaskAssignmentId);
         }
-        Submission? existsubmint = (Submission?) _context.Submissions.Where(t=>t.TaskAssignmentId==submission.TaskAssignmentId);
+        Submission? existsubmint =  _context.Submissions.Where(t=>t.TaskAssignmentId==submission.TaskAssignmentId).FirstOrDefault();
         if(existsubmint != null)
         {
             throw new BadRequestException("Submission already exist for this task");

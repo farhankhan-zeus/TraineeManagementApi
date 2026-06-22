@@ -3,6 +3,7 @@ using TraineeManagementApi.DTO.LearningTaskDTO;
 using TraineeManagementApi.DTO.MentorDTO;
 using TraineeManagementApi.DTO.ReviewDTO;
 using TraineeManagementApi.DTO.SubmissionDTO;
+using TraineeManagementApi.DTO.SubmissionFileDTO;
 using TraineeManagementApi.DTO.TaskAssignmentDTO;
 using TraineeManagementApi.DTO.TraineeDTO;
 using TraineeManagementApi.Models;
@@ -114,11 +115,35 @@ public static class ResponseDTOMapper
         {
             response.Score = review.Score;
         }
-        if(review.Mentor != null)
+        if(review.Mentor != null && review.Submission!=null)
         {
             response.Mentor= MapMentorToDTO(review.Mentor);
             response.Submission=MaptoSubmissionResponse(review.Submission);
         }
         return response;
+    }
+
+     public static SubmissionFileResponseDTO MaptoSubmissionFile(SubmissionFile submissionfile)
+    {
+        SubmissionFileResponseDTO response= new SubmissionFileResponseDTO
+        {
+            Id=submissionfile.Id,
+            checksum=submissionfile.checksum,
+            orignalName=submissionfile.orignalName,
+            generatedName=submissionfile.generatedName,
+            size=submissionfile.size,
+            UpdatedAt=submissionfile.UpdatedAt,
+            CreatedAt=submissionfile.UpdatedAt,
+            UploadedById=submissionfile.UploadedById,
+            SubmissionId=submissionfile.SubmissionId,
+            ContentType=submissionfile.ContentType,
+        };
+        if (submissionfile.Submission !=null)
+        {
+            // response.UploadedBy= MapTraineetoDTO(submissionfile.UploadedBy);
+            response.Submission=MaptoSubmissionResponse(submissionfile.Submission);
+        }
+        return response;
+            
     }
 }
