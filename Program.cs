@@ -50,7 +50,16 @@ builder.Services.AddDbContext<ApiContext>( options =>{
 });
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
-
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration=builder.Configuration.GetConnectionString("RedisConnection");
+    options.InstanceName=builder.Configuration.GetConnectionString("RedisInstanceName");
+    options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
+    {   EndPoints={"localhost:6379"},
+        ConnectRetry=2,
+        ConnectTimeout=3000,
+    };
+});
 builder.Services.AddControllers();
 builder.Services.AddScoped<ITraineeService,TraineeService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -60,6 +69,7 @@ builder.Services.AddScoped<ITaskAssignmentService,TaskAssignmentService>();
 builder.Services.AddScoped<ISubmissionService,SubmissionService>();
 builder.Services.AddScoped<IReviewService,ReviewService>();
 builder.Services.AddScoped<IFileStorageService,FileStorageService>();
+builder.Services.AddScoped<IRedisService,RedisService>();
 
 builder.Services.AddAuthentication(options =>
 {

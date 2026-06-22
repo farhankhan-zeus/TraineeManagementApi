@@ -22,10 +22,10 @@ public class TaskAssignmentController : ControllerBase
 
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> Getall()
+    public async Task<IActionResult> Getall(CancellationToken cancellationToken=default)
     {
         
-            List<TaskAssignmentResponseDTO> response = await _taskassignmentService.Getall();
+            List<TaskAssignmentResponseDTO> response = await _taskassignmentService.Getall(cancellationToken);
             _logger.LogInformation("Tasks fetched successfully");
             return Ok( new ApiResponse<List<TaskAssignmentResponseDTO?>>
             {
@@ -38,10 +38,10 @@ public class TaskAssignmentController : ControllerBase
     }
     [Authorize]
     [HttpGet("{Id:guid}")]    
-    public async Task<IActionResult> GetById (Guid Id)
+    public async Task<IActionResult> GetById (Guid Id,CancellationToken cancellationToken = default)
     {
        
-        var result = await _taskassignmentService.GetById(Id);
+        var result = await _taskassignmentService.GetById(Id, cancellationToken);
         
         _logger.LogInformation($"TaskAssignment with Id:{Id} fetched successfully",Id);
         return Ok( new ApiResponse<TaskAssignmentResponseDTO>

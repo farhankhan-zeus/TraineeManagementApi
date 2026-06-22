@@ -13,10 +13,12 @@ namespace TraineeManagementApi.Services;
 public class TraineeService : ITraineeService 
 {
     private readonly ApiContext _context;
+    private readonly IRedisService _redisservice;
     private readonly ILogger<TraineeService> _logger;
-    public TraineeService( ApiContext context, ILogger<TraineeService> logger){
+    public TraineeService( ApiContext context, IRedisService redisService, ILogger<TraineeService> logger){
         _context=context;
         _logger =logger;
+        _redisservice = redisService;
     }
 
     
@@ -52,10 +54,22 @@ public class TraineeService : ITraineeService
        
     }
 
-    public async Task<TraineeResponseDTO> GetById ( Guid Id){
+    public async Task<TraineeResponseDTO> GetById ( Guid Id,CancellationToken cancellationToken){
         // var result =trainees.FirstOrDefault(p=>p.Id==Id);
+        string stringId = Convert.ToString(Id);
+        if(stringId is null)
+        {
+            throw new BadRequestException("Valid Id is required");
+        }
+         string _keyPrefix = $"{typeof(Trainee).Name}:";
+            string validKey= _keyPrefix+":"+stringId;
+        Trainee? result = await _redisservice.GetorSetAsync<Trainee?>(validKey,async () =>
+        {
+            
+             Trainee? result =  await _context.Trainees.FindAsync(Id,cancellationToken);
+             return result;
+        },cancellationToken);
        
-             Trainee? result =  await _context.Trainees.FindAsync(Id);
         if (result == null){
             throw new NotFoundException("Trainee",Id);
         }
@@ -63,7 +77,7 @@ public class TraineeService : ITraineeService
        
     }
 
-    public async Task<TraineeResponseDTO> AddTrainee(CreateorUpdateTraineeRequestDTO traineedto){
+    public async Task<TraineeResponseDTO> AddTrainee(CreateorUpdateTraineeRequestDTO traineedto,CancellationToken cancellationToken){
        
   
              Trainee newTrainee = new Trainee {
@@ -77,15 +91,20 @@ public class TraineeService : ITraineeService
             UpdatedDate=DateTime.Now
         };
         
-        await _context.Trainees.AddAsync(newTrainee);
-        await _context.SaveChangesAsync();
+        await _context.Trainees.AddAsync(newTrainee,cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
         return ResponseDTOMapper.MapTraineetoDTO(newTrainee);
        
     }
 
-    public async Task<TraineeResponseDTO> UpdateTrainee(Guid Id, CreateorUpdateTraineeRequestDTO updatedTraineedto){
-       
-             Trainee? atrainee =   await _context.Trainees.FindAsync(Id);
+    public async Task<TraineeResponseDTO> UpdateTrainee(Guid Id, CreateorUpdateTraineeRequestDTO updatedTraineedto,CancellationToken cancellationToken){
+        
+        string stringId= Convert.ToString(Id);
+            if(stringId is null)
+        {
+            throw new BadRequestException("valid Id is required");
+        }
+             Trainee? atrainee =   await _context.Trainees.FindAsync(Id,cancellationToken);
         if (atrainee == null)
         {
             throw new NotFoundException("Trainee",Id);
@@ -98,13 +117,20 @@ public class TraineeService : ITraineeService
         atrainee.Status = updatedTraineedto.Status;
         atrainee.UpdatedDate= DateTime.Now;
 
-       await _context.SaveChangesAsync();
+       await _context.SaveChangesAsync(cancellationToken);
+        string _keyPrefix = $"{typeof(Trainee).Name}:";
+            string validKey= _keyPrefix+":"+stringId;
+        await _redisservice.InvalidateAsync<Trainee>(validKey,cancellationToken);
         return ResponseDTOMapper.MapTraineetoDTO(atrainee);
        
     }
 
-    public async Task<bool> Delete(Guid Id){
-        
+    public async Task<bool> Delete(Guid Id,CancellationToken cancellationToken){
+            string stringId= Convert.ToString(Id);
+            if(stringId is null)
+        {
+            throw new BadRequestException("valid Id is required");
+        }
              Trainee? atrainee = _context.Trainees.Where(t=>t.Id==Id).FirstOrDefault();
         if (atrainee == null)
         {
@@ -112,7 +138,11 @@ public class TraineeService : ITraineeService
         }
 
        _context.Trainees.Remove(atrainee);
-       await _context.SaveChangesAsync();
+       await _context.SaveChangesAsync(cancellationToken);
+       
+        string _keyPrefix = $"{typeof(Trainee).Name}:";
+            string validKey= _keyPrefix+":"+stringId;
+        await _redisservice.InvalidateAsync<Trainee>(validKey,cancellationToken);
         return true;
        
     } 

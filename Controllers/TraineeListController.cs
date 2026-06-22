@@ -42,11 +42,11 @@ public class TraineeListController : ControllerBase
 
     [Authorize]
     [HttpGet("{Id:guid}")]    
-    public async  Task<IActionResult> GetById(Guid Id)
+    public async  Task<IActionResult> GetById(Guid Id,CancellationToken cancellationToken=default)
     {
         // return MapTraineetoDTO(trainees.FirstOrDefault(p=>p.Id==Id));
         
-             TraineeResponseDTO result = await _traineeservice.GetById(Id);
+             TraineeResponseDTO result = await _traineeservice.GetById(Id,cancellationToken);
         return Ok(new ApiResponse<TraineeResponseDTO>
         {
             success=true,
@@ -59,7 +59,7 @@ public class TraineeListController : ControllerBase
 
         [Authorize]
         [HttpPost]
-    public async  Task<IActionResult> AddTrainee(CreateorUpdateTraineeRequestDTO traineedto)
+    public async  Task<IActionResult> AddTrainee(CreateorUpdateTraineeRequestDTO traineedto,CancellationToken cancellationToken=default)
     {
         // var newTrainee = new Trainee {
         //     Id=nextId+1,
@@ -75,7 +75,7 @@ public class TraineeListController : ControllerBase
         // nextId+=1;
         // return MapTraineetoDTO(newTrainee);
        
-             TraineeResponseDTO addedTrainee= await _traineeservice.AddTrainee(traineedto);
+             TraineeResponseDTO addedTrainee= await _traineeservice.AddTrainee(traineedto,cancellationToken);
              
      return Created("/api/trainee",new ApiResponse<TraineeResponseDTO>
         {
@@ -89,7 +89,7 @@ public class TraineeListController : ControllerBase
 
     [Authorize]
     [HttpPut("{Id:guid}")]
-    public async  Task<IActionResult> UpdateTrainee(Guid Id, CreateorUpdateTraineeRequestDTO updatedTraineedto)
+    public async  Task<IActionResult> UpdateTrainee(Guid Id, CreateorUpdateTraineeRequestDTO updatedTraineedto,CancellationToken cancellationToken=default)
     {
         //     var atrainee = trainees.FirstOrDefault(p => p.Id == Id);
         //     if (atrainee == null) return null;
@@ -104,7 +104,7 @@ public class TraineeListController : ControllerBase
 
         //     return MapTraineetoDTO(atrainee);
        
-             TraineeResponseDTO updated= await _traineeservice.UpdateTrainee(Id,updatedTraineedto);
+             TraineeResponseDTO updated= await _traineeservice.UpdateTrainee(Id,updatedTraineedto,cancellationToken);
            
             return Ok(new ApiResponse<TraineeResponseDTO>
         {
@@ -117,7 +117,7 @@ public class TraineeListController : ControllerBase
 
     [Authorize]
     [HttpDelete("{Id:guid}")]
-    public async  Task<IActionResult> Delete(Guid Id)
+    public async  Task<IActionResult> Delete(Guid Id,CancellationToken cancellationToken=default)
     {
         //     var atrainee = trainees.FirstOrDefault(p => p.Id == Id);
         //     if (atrainee == null) return false;
@@ -125,7 +125,7 @@ public class TraineeListController : ControllerBase
         //     trainees.Remove(atrainee);
         //     return true;
        
-            bool isDeleted =await  _traineeservice.Delete(Id);
+            bool isDeleted =await  _traineeservice.Delete(Id,cancellationToken);
             if(isDeleted) _logger.LogInformation($"Trainee with Id: {Id} deleted",Id);
             return NoContent();
     }

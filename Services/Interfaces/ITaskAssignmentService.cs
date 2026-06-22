@@ -5,9 +5,9 @@ using TraineeManagementApi.Models;
 namespace TraineeManagementApi.Services.Interfaces;
 
 public interface ITaskAssignmentService{
-    Task<List<TaskAssignmentResponseDTO>> Getall ();
+    Task<List<TaskAssignmentResponseDTO>> Getall (CancellationToken cancellationToken);
 
-    Task<TaskAssignmentResponseDTO> GetById ( Guid Id);
+    Task<TaskAssignmentResponseDTO> GetById ( Guid Id,CancellationToken cancellationToken);
 
     Task<TaskAssignmentResponseDTO> AddTask( CreateorUpdateTaskAssignmentRequestDTO task);
 

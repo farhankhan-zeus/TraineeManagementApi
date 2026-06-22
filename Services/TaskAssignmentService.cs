@@ -14,33 +14,58 @@ public class TaskAssignmentService : ITaskAssignmentService
     private readonly ApiContext _context;
     private readonly ILogger<TaskAssignmentService> _logger;
 
-    public TaskAssignmentService(ApiContext context, ILogger<TaskAssignmentService> logger)
+    private readonly IRedisService _redisService;
+    
+    private  const string AllTaskAssignmentKey = "allTasks";
+
+    public TaskAssignmentService(ApiContext context, IRedisService redisService,ILogger<TaskAssignmentService> logger)
     {
         _context = context;
         _logger = logger;
+        _redisService= redisService;
     }
 
  
-     public async Task<List<TaskAssignmentResponseDTO>> Getall()
+     public async Task<List<TaskAssignmentResponseDTO>> Getall(CancellationToken cancellationToken)
     {
-       
+        List<TaskAssignment>? tasks= await _redisService.GetorSetAsync(AllTaskAssignmentKey, async () =>
+        {
             List<TaskAssignment> tasks = await _context.TaskAssignments.Include(t=>t.Trainee).Include(t=>t.LearningTask).Include(t=>t.Mentor).ToListAsync();
-            if(tasks.Count == 0)
+            return tasks;
+            
+        },cancellationToken);
+            if( tasks is null || tasks.Count == 0)
             {
                 return [];
             }
+        
             List<TaskAssignmentResponseDTO> result = tasks.Select(ResponseDTOMapper.MaptoTaskAssignmentResponse).ToList();
             return result;
+       
             
 
 
        
     }
 
-    public async Task<TaskAssignmentResponseDTO> GetById(Guid Id)
-    {
+    public async Task<TaskAssignmentResponseDTO> GetById(Guid Id,CancellationToken cancellationToken)
+    {       
+        
+            string stringId=Convert.ToString(Id);
+            if(stringId is null)
+        {
+            throw new BadRequestException("Invalid Id");
+        }
+            string _keyPrefix = $"{typeof(TaskAssignment).Name}:";
+            string validKey= _keyPrefix+":"+stringId;
+            
+            TaskAssignment? task = await _redisService.GetorSetAsync(validKey, async () =>
+            {
+
+            TaskAssignment? task = await _context.TaskAssignments.Include(t=>t.Trainee).Include(t=>t.LearningTask).Include(t=>t.Mentor).FirstOrDefaultAsync(ta => ta.Id == Id);
+            return task; 
+            },cancellationToken);
        
-            TaskAssignment? task = await _context.TaskAssignments.Include(t=>t.Trainee).Include(t=>t.LearningTask).Include(t=>t.Mentor).FirstOrDefaultAsync(ta => ta.Id == Id); 
             if(task == null)
             {
                 throw new NotFoundException("Task Assignment",Id);
@@ -84,13 +109,20 @@ public class TaskAssignmentService : ITaskAssignmentService
             }
             await _context.TaskAssignments.AddAsync(newTask);
             await _context.SaveChangesAsync();
+            CancellationToken cancellationToken = default;
+            await _redisService.InvalidateAsync<List<TaskAssignment>>(AllTaskAssignmentKey,cancellationToken);
             return ResponseDTOMapper.MaptoTaskAssignmentResponse(newTask);
        
         
     }
 
     public async Task<TaskAssignmentResponseDTO> UpdateTask(Guid Id,CreateorUpdateTaskAssignmentRequestDTO task)
-    {
+    {       
+         string stringId=Convert.ToString(Id);
+            if(stringId is null)
+        {
+            throw new BadRequestException("Invalid Id");
+        }
        
             TaskAssignment? newTask = await _context.TaskAssignments.FindAsync(Id);
             if(newTask == null)
@@ -102,6 +134,11 @@ public class TaskAssignmentService : ITaskAssignmentService
             newTask.UpdatedDate = DateTime.Now;
 
             await _context.SaveChangesAsync();
+            CancellationToken cancellationToken = default;
+            await _redisService.InvalidateAsync<List<TaskAssignment>>(AllTaskAssignmentKey,cancellationToken);
+             string _keyPrefix = $"{typeof(TaskAssignment).Name}:";
+            string validKey= _keyPrefix+":"+stringId;
+            await _redisService.InvalidateAsync<TaskAssignment>(validKey,cancellationToken);
             return ResponseDTOMapper.MaptoTaskAssignmentResponse(newTask);
 
         
@@ -109,7 +146,11 @@ public class TaskAssignmentService : ITaskAssignmentService
 
     public async Task<bool> DeleteTask (Guid Id)
     {
-       
+             string stringId=Convert.ToString(Id);
+            if(stringId is null)
+        {
+            throw new BadRequestException("Invalid Id");
+        }
             TaskAssignment? task = await _context.TaskAssignments.FindAsync(Id);
             if(task== null)
             {
@@ -117,6 +158,11 @@ public class TaskAssignmentService : ITaskAssignmentService
             }
             _context.TaskAssignments.Remove(task);
             await _context.SaveChangesAsync();
+            CancellationToken cancellationToken = default;
+            await _redisService.InvalidateAsync<List<TaskAssignment>>(AllTaskAssignmentKey,cancellationToken);
+             string _keyPrefix = $"{typeof(TaskAssignment).Name}:";
+            string validKey= _keyPrefix+":"+stringId;
+            await _redisService.InvalidateAsync<TaskAssignment>(validKey,cancellationToken);
             return true;
 
 

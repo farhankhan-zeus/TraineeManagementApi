@@ -22,10 +22,10 @@ public class SubmissionController : ControllerBase
 
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> Getall()
+    public async Task<IActionResult> Getall(CancellationToken cancellationToken=default)
     {
        
-            List<SubmissionResponseDTO> response = await _submissionservice.Getall();
+            List<SubmissionResponseDTO> response = await _submissionservice.Getall(cancellationToken);
             _logger.LogInformation("Tasks fetched successfully");
             return Ok( new ApiResponse<List<SubmissionResponseDTO?>>
             {
@@ -38,12 +38,12 @@ public class SubmissionController : ControllerBase
     }
     [Authorize]
     [HttpGet("{Id:guid}")]    
-    public async Task<IActionResult> GetById (Guid Id)
+    public async Task<IActionResult> GetById (Guid Id,CancellationToken cancellationToken=default)
     {
        
-        var result = await _submissionservice.GetById(Id);
+        var result = await _submissionservice.GetById(Id,cancellationToken);
        
-        _logger.LogInformation($"TaskAssignment with Id:{Id} fetched successfully",Id);
+        _logger.LogInformation($"Submission with Id:{Id} fetched successfully",Id);
         return Ok( new ApiResponse<SubmissionResponseDTO>
             {
                 success=true,
@@ -56,10 +56,10 @@ public class SubmissionController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> AddSubmission(  CreateorUpdateSubmissionRequestDTO submission)
+    public async Task<IActionResult> AddSubmission(  CreateorUpdateSubmissionRequestDTO submission,CancellationToken cancellationToken=default)
     {
         
-            SubmissionResponseDTO response = await _submissionservice.AddSubmission(submission);
+            SubmissionResponseDTO response = await _submissionservice.AddSubmission(submission,cancellationToken);
             return Ok( new ApiResponse<SubmissionResponseDTO>
             {
                 success=true,
@@ -71,9 +71,9 @@ public class SubmissionController : ControllerBase
 
     [Authorize]
     [HttpPut("{Id:guid}/status")]
-    public async Task<IActionResult> updateSubmission(Guid Id,CreateorUpdateSubmissionRequestDTO updatedsubmission)
+    public async Task<IActionResult> updateSubmission(Guid Id,CreateorUpdateSubmissionRequestDTO updatedsubmission,CancellationToken cancellationToken=default)
     {
-        SubmissionResponseDTO response = await _submissionservice.UpdateSubmission(Id, updatedsubmission);
+        SubmissionResponseDTO response = await _submissionservice.UpdateSubmission(Id, updatedsubmission,cancellationToken);
        
         _logger.LogInformation($"Task Assignment with Id:{Id} updated successfully",Id);
         return Ok(new ApiResponse<SubmissionResponseDTO>
