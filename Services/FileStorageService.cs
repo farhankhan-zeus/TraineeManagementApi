@@ -15,17 +15,21 @@ public class FileStorageService : IFileStorageService
     private readonly ILogger<FileStorageService> _logger;
      private readonly IConfiguration _config;
      private readonly ApiContext _context;
+
+     private readonly IRabbitMQService _rabbitmqservice;
     
 
     
-    
-    public FileStorageService(ILogger<FileStorageService> logger,IConfiguration configuration, ApiContext context )
+    public FileStorageService(ILogger<FileStorageService> logger,IConfiguration configuration, ApiContext context ,IRabbitMQService rabbitMQService )
     {
         _logger=logger;
         _config=configuration;
         _context= context;
+        _rabbitmqservice = rabbitMQService;
     }
-
+    private MessageBus submissionfilemessagebus= new();
+    private string queueName = "SubmissionFileProcessing";
+    
    
     private string[] permittedExtensions = { ".txt", ".pdf" };
     public async Task<List<SubmissionFileResponseDTO>> SaveAsync (IFormFileCollection files,Guid Submission_Id,Guid UploadedBy_Id,CancellationToken cancellationToken )
@@ -77,7 +81,19 @@ public class FileStorageService : IFileStorageService
         _logger.LogInformation($"File with Id: {submissionFile.Id} for submission with Id: {submissionFile.SubmissionId} added to storage",submissionFile.Id,submissionFile.SubmissionId);
             submissionFiles.Add(submissionFile);
 
+        SubmissionProcessingRequest message= new SubmissionProcessingRequest
+        {
+            SubmissionId=Submission_Id,
+            FileId=submissionFile.Id,
+            RequestedAt=DateTime.Now,
+
+        };
+        submissionfilemessagebus.HostName=_config["RabbitMQ:Host"];
+        submissionfilemessagebus.QueueName=queueName;
+        await _rabbitmqservice.SendMessage<SubmissionProcessingRequest>(message,submissionfilemessagebus,cancellationToken);
+        _logger.LogInformation($"SubmissionProcessingRequest submitted with Id: {message.Id}, SubmissionId: {message.SubmissionId}, CorrelationId: {message.CorrelationId}",message.Id,message.SubmissionId,message.CorrelationId);
         }
+
 
         await _context.SubmissionFiles.AddRangeAsync(submissionFiles);
         await _context.SaveChangesAsync();

@@ -70,6 +70,7 @@ builder.Services.AddScoped<ISubmissionService,SubmissionService>();
 builder.Services.AddScoped<IReviewService,ReviewService>();
 builder.Services.AddScoped<IFileStorageService,FileStorageService>();
 builder.Services.AddScoped<IRedisService,RedisService>();
+builder.Services.AddScoped<IRabbitMQService,RabbitMQService>();
 
 builder.Services.AddAuthentication(options =>
 {
