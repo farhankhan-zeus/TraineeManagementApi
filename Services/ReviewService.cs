@@ -41,6 +41,7 @@ public class ReviewService : IReviewService
 
     public async Task<ReviewResponseDTO> GetById(Guid Id)
     {
+             GuidValidation.ValidateGuid(Id);
        
             Review? review = (Review?) _context.Reveiws.Include(t=>t.Mentor).Include(t=>t.Submission).Where(t=>t.Id==Id).FirstOrDefault();
             if(review == null)
@@ -61,6 +62,7 @@ public class ReviewService : IReviewService
         {
             throw new NotFoundException("Submission",review.SubmissionId);
         }
+        
         Mentor? mentor = await _context.Mentors.FindAsync(review.MentorId);
         if(existSubmission == null)
         {
@@ -93,6 +95,8 @@ public class ReviewService : IReviewService
 
     public async Task<ReviewResponseDTO> UpdateReview(Guid Id,CreateorUpdateReviewRequestDTO review)
     {
+         GuidValidation.ValidateGuid(Id);
+       
         
             Review? existreview = await _context.Reveiws.FindAsync(Id);
             if(existreview == null)

@@ -52,7 +52,8 @@ public class MentorService: IMentorService
     }
 
     public async Task<MentorResponseDTO> GetById(Guid Id)
-    {
+    {     GuidValidation.ValidateGuid(Id);
+       
         
             Mentor? mentee = await _context.Mentors.FindAsync(Id);
             if(mentee == null)
@@ -84,7 +85,8 @@ public class MentorService: IMentorService
 
     public async Task<MentorResponseDTO> UpdateMentor(Guid Id,CreateorUpdateMentorRequestDTO updatedmentee)
     {
-        
+        GuidValidation.ValidateGuid(Id);
+       
             Mentor? mentee = await _context.Mentors.FindAsync(Id);
             if(mentee == null)
             {
@@ -105,6 +107,8 @@ public class MentorService: IMentorService
 
     public async Task<bool> DeleteMentor (Guid Id)
     {
+          GuidValidation.ValidateGuid(Id);
+       
        
             Mentor? mentee = await _context.Mentors.FindAsync(Id);
             if(mentee== null)

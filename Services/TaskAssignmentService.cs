@@ -51,11 +51,8 @@ public class TaskAssignmentService : ITaskAssignmentService
     public async Task<TaskAssignmentResponseDTO> GetById(Guid Id,CancellationToken cancellationToken)
     {       
         
-            string stringId=Convert.ToString(Id);
-            if(stringId is null)
-        {
-            throw new BadRequestException("Invalid Id");
-        }
+            string stringId=Id.ToString();
+            GuidValidation.ValidateGuid(stringId);
             string _keyPrefix = $"{typeof(TaskAssignment).Name}:";
             string validKey= _keyPrefix+":"+stringId;
             
@@ -118,11 +115,8 @@ public class TaskAssignmentService : ITaskAssignmentService
 
     public async Task<TaskAssignmentResponseDTO> UpdateTask(Guid Id,CreateorUpdateTaskAssignmentRequestDTO task)
     {       
-         string stringId=Convert.ToString(Id);
-            if(stringId is null)
-        {
-            throw new BadRequestException("Invalid Id");
-        }
+         string stringId=Id.ToString();
+          GuidValidation.ValidateGuid(stringId);
        
             TaskAssignment? newTask = await _context.TaskAssignments.FindAsync(Id);
             if(newTask == null)
@@ -146,11 +140,8 @@ public class TaskAssignmentService : ITaskAssignmentService
 
     public async Task<bool> DeleteTask (Guid Id)
     {
-             string stringId=Convert.ToString(Id);
-            if(stringId is null)
-        {
-            throw new BadRequestException("Invalid Id");
-        }
+             string stringId=Id.ToString();
+           GuidValidation.ValidateGuid(stringId);
             TaskAssignment? task = await _context.TaskAssignments.FindAsync(Id);
             if(task== null)
             {

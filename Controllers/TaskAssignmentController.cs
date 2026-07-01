@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.DTO.TaskAssignmentDTO;
+using TraineeManagementApi.Exceptions;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Services.Interfaces;
 
@@ -40,6 +41,10 @@ public class TaskAssignmentController : ControllerBase
     [HttpGet("{Id:guid}")]    
     public async Task<IActionResult> GetById (Guid Id,CancellationToken cancellationToken = default)
     {
+            if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
        
         var result = await _taskassignmentService.GetById(Id, cancellationToken);
         
@@ -58,7 +63,10 @@ public class TaskAssignmentController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> addTask( CreateorUpdateTaskAssignmentRequestDTO task)
     {
-       
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
             TaskAssignmentResponseDTO response = await _taskassignmentService.AddTask(task);
             return Ok( new ApiResponse<TaskAssignmentResponseDTO>
             {
@@ -73,6 +81,10 @@ public class TaskAssignmentController : ControllerBase
     [HttpPut("{Id:guid}/status")]
     public async Task<IActionResult> updateTask(Guid Id,CreateorUpdateTaskAssignmentRequestDTO task)
     {
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         TaskAssignmentResponseDTO response = await _taskassignmentService.UpdateTask(Id, task);
         _logger.LogInformation($"Task Assignment with Id:{Id} updated successfully",Id);
         return Ok(new ApiResponse<TaskAssignmentResponseDTO>
@@ -87,6 +99,10 @@ public class TaskAssignmentController : ControllerBase
     [HttpDelete("{Id:guid}")]
     public async Task<IActionResult> deleteTask (Guid Id)
     {
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         bool response = await  _taskassignmentService.DeleteTask(Id);
         if(response) _logger.LogInformation($"TaskAssignment with Id: {Id} deleted",Id);
         return NoContent();

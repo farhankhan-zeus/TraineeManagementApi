@@ -40,12 +40,8 @@ public class SubmissionService : ISubmissionService
 
     public async Task<SubmissionResponseDTO> GetById(Guid Id,CancellationToken cancellationToken)
     {   
-        string stringId= Convert.ToString(Id);
-            if(stringId is null)
-        {
-            throw new BadRequestException("valid Id is required");
-            
-        }
+        string stringId= Id.ToString();
+          GuidValidation.ValidateGuid(stringId);
         
         string _keyPrefix = $"{typeof(Submission).Name}:";
             string validKey= _keyPrefix+":"+stringId;
@@ -75,6 +71,7 @@ public class SubmissionService : ISubmissionService
         {
             throw new NotFoundException("Task Assignment",submission.TaskAssignmentId);
         }
+        
         Submission? existsubmint =  _context.Submissions.Where(t=>t.TaskAssignmentId==submission.TaskAssignmentId).FirstOrDefault();
         if(existsubmint != null)
         {
@@ -102,12 +99,8 @@ public class SubmissionService : ISubmissionService
 
     public async Task<SubmissionResponseDTO> UpdateSubmission(Guid Id,CreateorUpdateSubmissionRequestDTO submission,CancellationToken cancellationToken)
     {
-        string stringId= Convert.ToString(Id);
-            if(stringId is null)
-        {
-            throw new BadRequestException("valid Id is required");
-        }
-       
+        string stringId= Id.ToString();
+           GuidValidation.ValidateGuid(stringId);
             Submission? existsubmission = await _context.Submissions.FindAsync(Id,cancellationToken);
             if(existsubmission == null)
             {

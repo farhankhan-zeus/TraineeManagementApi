@@ -17,6 +17,8 @@ public class FileStorageService : IFileStorageService
      private readonly ApiContext _context;
 
      private readonly IRabbitMQService _rabbitmqservice;
+
+     private const long MAX_FILE_SIZE = 2097152;
     
 
     
@@ -28,42 +30,52 @@ public class FileStorageService : IFileStorageService
         _rabbitmqservice = rabbitMQService;
     }
     private MessageBus submissionfilemessagebus= new();
-    private string queueName = "SubmissionFileProcessing";
+    private string QUEUENAME = "submissionprocessing";
+    
     
    
-    private string[] permittedExtensions = { ".txt", ".pdf" };
-    public async Task<List<SubmissionFileResponseDTO>> SaveAsync (IFormFileCollection files,Guid Submission_Id,Guid UploadedBy_Id,CancellationToken cancellationToken )
-    {
-        List<SubmissionFile> submissionFiles = new List<SubmissionFile>();
-        
-       foreach(IFormFile file in files)
+    private string[] permittedExtensions = { ".pdf" };
+    public async Task<Guid> SaveAsync (IFormFile file,Guid Submission_Id,Guid UploadedBy_Id,CancellationToken cancellationToken )
+    {    
+        string filePath="";    
+     try
         {
+        if (file is null)
+            {
+                throw new ArgumentNullException("file");
+            }
              if (file.Length == 0)
         {
             throw new BadRequestException("File is required");
         }   
-        if (file.Length > 2097152)
+        if (file.Length > MAX_FILE_SIZE)
         {
             throw new  BadRequestException("File is too large");
         }
         
         string unTrustedFileName = file.FileName;
-        string TrustedFileNamefordisplay = WebUtility.HtmlEncode(file.FileName);
         var ext = Path.GetExtension(unTrustedFileName).ToLowerInvariant();
         if (!permittedExtensions.Contains(ext))
         {
-            throw new  BadRequestException("File Type not supported");
+            throw new  UnSupportedMediaType("File Type not supported");
         }
+        
       
         string GeneratedFileName = Path.GetRandomFileName();
-        string filePath = Path.Combine(_config["Storage:path"],GeneratedFileName);
-       FileStream newFile = File.Create(filePath);
-
+        filePath = Path.Combine(_config["Storage:path"],GeneratedFileName);
+        using (Stream stream= file.OpenReadStream())
+        {
+            bool isValidContentType = SecureFileValidator.IsValidMimeType(stream,"application/pdf");
+            if (!isValidContentType)
+                {
+                    throw new  UnSupportedMediaType("File Type not supported");
+                }
+        } 
+       using(FileStream newFile = File.Create(filePath))
+            {                
         await file.CopyToAsync(newFile,cancellationToken);
-
-        byte[] hash = await SHA256.HashDataAsync(file.OpenReadStream(),cancellationToken);
         
-
+            }
         SubmissionFile submissionFile = new SubmissionFile
         {
             orignalName=unTrustedFileName,
@@ -73,31 +85,67 @@ public class FileStorageService : IFileStorageService
             UploadedById=UploadedBy_Id,
             CreatedAt=DateTime.Now,
             UpdatedAt= DateTime.Now,
-            checksum= Convert.ToHexString(hash),
+            // checksum= Convert.ToHexString(hash),
             SubmissionId=Submission_Id
 
 
         };
         _logger.LogInformation($"File with Id: {submissionFile.Id} for submission with Id: {submissionFile.SubmissionId} added to storage",submissionFile.Id,submissionFile.SubmissionId);
-            submissionFiles.Add(submissionFile);
-
-        SubmissionProcessingRequest message= new SubmissionProcessingRequest
+         
+         SubmissionProcessingRequest message= new SubmissionProcessingRequest
         {
             SubmissionId=Submission_Id,
             FileId=submissionFile.Id,
+            SubmissionFile=submissionFile,
             RequestedAt=DateTime.Now,
 
         };
-        submissionfilemessagebus.HostName=_config["RabbitMQ:Host"];
-        submissionfilemessagebus.QueueName=queueName;
-        await _rabbitmqservice.SendMessage<SubmissionProcessingRequest>(message,submissionfilemessagebus,cancellationToken);
-        _logger.LogInformation($"SubmissionProcessingRequest submitted with Id: {message.Id}, SubmissionId: {message.SubmissionId}, CorrelationId: {message.CorrelationId}",message.Id,message.SubmissionId,message.CorrelationId);
-        }
+        
+       
+      try
+      {
+         submissionfilemessagebus.HostName=_config["RabbitMQ:Host"];
+        submissionfilemessagebus.QueueName=QUEUENAME;
+          await _rabbitmqservice.SendMessage<SubmissionProcessingRequest>(message,submissionfilemessagebus,cancellationToken);
+      }
+      catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException)
+      {
+        
+        throw ;
+      }
+      ProcessingJob Job = new ProcessingJob
+      {
+          CorrelationId = message.CorrelationId,
+          Status="Queued",
+          Started=DateTime.Now,
+         
+          
+
+      };
+      await _context.ProcessingJobs.AddAsync(Job);
+     await _context.SaveChangesAsync();
 
 
-        await _context.SubmissionFiles.AddRangeAsync(submissionFiles);
-        await _context.SaveChangesAsync();
-        return submissionFiles.Select(ResponseDTOMapper.MaptoSubmissionFile).ToList();
+        _logger.LogInformation($"SubmissionProcessingRequest submitted with Id: {message.MessageId}, SubmissionId: {message.SubmissionId}, CorrelationId: {message.CorrelationId}",message.MessageId,message.SubmissionId,message.CorrelationId);
+        
+        return Job.Id;
+        
+     }
+     catch (IOException)
+     {
+       
+            if(filePath !="") File.Delete(filePath);
+           
+        throw;
+     }
+
+        
+            
+       
+        
+
+
+       
         
 
 

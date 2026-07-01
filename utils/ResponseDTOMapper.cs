@@ -1,4 +1,5 @@
 
+using TraineeManagementApi.DTO.JobProcessing;
 using TraineeManagementApi.DTO.LearningTaskDTO;
 using TraineeManagementApi.DTO.MentorDTO;
 using TraineeManagementApi.DTO.ReviewDTO;
@@ -145,5 +146,23 @@ public static class ResponseDTOMapper
         }
         return response;
             
+    }
+    public static JobProcessingDTOResponse MapJobProcessing(ProcessingJob processingJob)
+    {
+        JobProcessingDTOResponse response = new JobProcessingDTOResponse
+        {
+            Id=processingJob.Id,
+            CorrelationId=processingJob.CorrelationId,
+            Status=processingJob.Status,
+            Started=processingJob.Started,
+            Completed=processingJob.Completed,
+            Attempts=processingJob.Attempts,
+
+        };
+        if(processingJob.ErrorSummary != null)
+        {
+            response.ErrorSummary=processingJob.ErrorSummary;
+        }
+        return response;
     }
 }

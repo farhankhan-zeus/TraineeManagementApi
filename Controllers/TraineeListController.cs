@@ -4,6 +4,7 @@ using TraineeManagementApi.DTO.TraineeDTO;
 using TraineeManagementApi.Services;
 using TraineeManagementApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using TraineeManagementApi.Exceptions;
 namespace TraineeManagementApi.Controllers;
 
 [ApiController]
@@ -28,6 +29,10 @@ public class TraineeListController : ControllerBase
      public async Task<IActionResult> GetAll([FromQuery] QuertFilter filter ,CancellationToken cancellationToken)
     {
         // return trainees.Select(MapTraineetoDTO).ToList();
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         
               PagedResponse<TraineeResponseDTO> result= await _traineeservice.GetAll(filter,cancellationToken);
        
@@ -40,11 +45,15 @@ public class TraineeListController : ControllerBase
        
     }
 
-    [Authorize]
+    // [Authorize]
     [HttpGet("{Id:guid}")]    
     public async  Task<IActionResult> GetById(Guid Id,CancellationToken cancellationToken=default)
     {
         // return MapTraineetoDTO(trainees.FirstOrDefault(p=>p.Id==Id));
+        if (!ModelState.IsValid)
+    {
+        throw new BadRequestException("Invalid Id format");
+    }
         
              TraineeResponseDTO result = await _traineeservice.GetById(Id,cancellationToken);
         return Ok(new ApiResponse<TraineeResponseDTO>
@@ -74,6 +83,10 @@ public class TraineeListController : ControllerBase
         // trainees.Add(newTrainee);
         // nextId+=1;
         // return MapTraineetoDTO(newTrainee);
+        if (!ModelState.IsValid)
+    {
+        throw new BadRequestException("Invalid Data");
+    }
        
              TraineeResponseDTO addedTrainee= await _traineeservice.AddTrainee(traineedto,cancellationToken);
              
@@ -103,6 +116,10 @@ public class TraineeListController : ControllerBase
 
 
         //     return MapTraineetoDTO(atrainee);
+           if (!ModelState.IsValid)
+    {
+        throw new BadRequestException("Invalid Data");
+    }
        
              TraineeResponseDTO updated= await _traineeservice.UpdateTrainee(Id,updatedTraineedto,cancellationToken);
            
@@ -124,6 +141,11 @@ public class TraineeListController : ControllerBase
 
         //     trainees.Remove(atrainee);
         //     return true;
+           if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
+        
        
             bool isDeleted =await  _traineeservice.Delete(Id,cancellationToken);
             if(isDeleted) _logger.LogInformation($"Trainee with Id: {Id} deleted",Id);

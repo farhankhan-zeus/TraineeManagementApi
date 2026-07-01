@@ -4,6 +4,7 @@ using TraineeManagementApi.DTO;
 using TraineeManagementApi.Services;
 using TraineeManagementApi.Services.Interfaces;
 using TraineeManagementApi.DTO.AuthDTO;
+using TraineeManagementApi.Exceptions;
 namespace TraineeManagementApi.Controllers;
 
 
@@ -21,6 +22,10 @@ public class AuthController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Login( LoginRequestDTO loginrequest)
     {
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         
             LoginResponseDTO? response =await _authService.Login(loginrequest);
             if (response== null)

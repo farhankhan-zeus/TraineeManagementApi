@@ -27,8 +27,8 @@ public class SubmissionFile
     [Required]
     public required long size {get; set;}
 
-    [Required]
-    public required string checksum {get; set;}
+    
+    public  string? checksum {get; set;}
 
     [Required]
     public  Guid UploadedById {get; set;}

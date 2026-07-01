@@ -4,6 +4,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Services.Interfaces;
+using TraineeManagementApi.Constants;
 
 namespace TraineeManagementApi.Services;
 
@@ -12,27 +13,34 @@ public class RabbitMQService:IRabbitMQService
 
     private readonly IConfiguration _config;
     private readonly ILogger<RabbitMQService> _logger;
-    public RabbitMQService(IConfiguration configuration, ILogger<RabbitMQService> logger)
+    private readonly ConnectionFactory _connection;
+    public RabbitMQService(IConfiguration configuration, ILogger<RabbitMQService> logger,ConnectionFactory connection)
     {
         _config = configuration;
         _logger = logger;
+        _connection=connection;
     }
     public async Task SendMessage<T> (T message, MessageBus messagebus,CancellationToken cancellationToken)
     {
        
-              var factory = new ConnectionFactory
-        {
-            HostName= _config["RabbitMQ:Host"],
-            UserName = _config["RabbitMQ:UserName"],
-            Password = _config["RabbitMQ:Password"],
-            Port= Convert.ToInt32(_config["RabbitMQ:Port"])
-        };
-        factory.AutomaticRecoveryEnabled=true;
-        IConnection connection = await factory.CreateConnectionAsync();
+              
+        // _connection.AutomaticRecoveryEnabled=true;
+        IConnection connection = await _connection.CreateConnectionAsync();
         
-        using
-        var Channel = await connection.CreateChannelAsync();
-        await Channel.QueueDeclareAsync(messagebus.QueueName,false,false,false,null);
+        
+        using var Channel = await connection.CreateChannelAsync();
+         await Channel.QueueDeclareAsync(
+            queue: RabbitMQConstants.QUEUE_NAME,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments:  new Dictionary<string, object?>
+            {
+                ["x-dead-letter-exchange"]= RabbitMQConstants.X_DEAD_LETTER_EXCHANGE,
+                ["x-dead-letter-routing-key"] =RabbitMQConstants.X_DEAD_LETTER_EXCHANGE_KEY
+            },
+            cancellationToken: cancellationToken
+        );
 
         string json = JsonConvert.SerializeObject(message);
         byte[] body = Encoding.UTF8.GetBytes(json);
@@ -51,7 +59,7 @@ public class RabbitMQService:IRabbitMQService
         }
 
        await Channel.CloseAsync(cancellationToken);
-        await connection.CloseAsync(cancellationToken);
+       
         
      
    

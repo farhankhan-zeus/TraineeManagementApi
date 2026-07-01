@@ -56,12 +56,9 @@ public class TraineeService : ITraineeService
 
     public async Task<TraineeResponseDTO> GetById ( Guid Id,CancellationToken cancellationToken){
         // var result =trainees.FirstOrDefault(p=>p.Id==Id);
-        string stringId = Convert.ToString(Id);
-        if(stringId is null)
-        {
-            throw new BadRequestException("Valid Id is required");
-        }
-         string _keyPrefix = $"{typeof(Trainee).Name}:";
+        string stringId = Id.ToString();
+       GuidValidation.ValidateGuid(stringId);
+        string _keyPrefix = $"{typeof(Trainee).Name}:";
             string validKey= _keyPrefix+":"+stringId;
         Trainee? result = await _redisservice.GetorSetAsync<Trainee?>(validKey,async () =>
         {
@@ -99,11 +96,8 @@ public class TraineeService : ITraineeService
 
     public async Task<TraineeResponseDTO> UpdateTrainee(Guid Id, CreateorUpdateTraineeRequestDTO updatedTraineedto,CancellationToken cancellationToken){
         
-        string stringId= Convert.ToString(Id);
-            if(stringId is null)
-        {
-            throw new BadRequestException("valid Id is required");
-        }
+        string stringId= Id.ToString();
+         GuidValidation.ValidateGuid(stringId);
              Trainee? atrainee =   await _context.Trainees.FindAsync(Id,cancellationToken);
         if (atrainee == null)
         {
@@ -126,11 +120,8 @@ public class TraineeService : ITraineeService
     }
 
     public async Task<bool> Delete(Guid Id,CancellationToken cancellationToken){
-            string stringId= Convert.ToString(Id);
-            if(stringId is null)
-        {
-            throw new BadRequestException("valid Id is required");
-        }
+        string stringId=Id.ToString();
+          GuidValidation.ValidateGuid(stringId);
              Trainee? atrainee = _context.Trainees.Where(t=>t.Id==Id).FirstOrDefault();
         if (atrainee == null)
         {

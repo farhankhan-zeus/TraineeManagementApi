@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.DTO.LearningTaskDTO;
+using TraineeManagementApi.Exceptions;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Services.Interfaces;
 
@@ -41,6 +42,10 @@ public class LearningTaskController : ControllerBase
 
     public async Task<IActionResult> GetById (Guid Id)
     {
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         
         LearningTaskResponseDTO result = await _learningtaskservice.GetById(Id);
         _logger.LogInformation($"Learning Task with Id:{Id} fetched successfully",Id);
@@ -58,6 +63,10 @@ public class LearningTaskController : ControllerBase
     public async Task<IActionResult> addLearningTask( CreateorUpdateLearningTaskRequestDTO task)
     {
         
+            if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
             LearningTaskResponseDTO response = await _learningtaskservice.AddTask(task);
             return Ok( new ApiResponse<LearningTaskResponseDTO>
             {
@@ -72,6 +81,10 @@ public class LearningTaskController : ControllerBase
     [HttpPut("{Id:guid}")]
     public async Task<IActionResult> updateLearningTask (Guid Id,CreateorUpdateLearningTaskRequestDTO task)
     {
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         LearningTaskResponseDTO response = await _learningtaskservice.UpdateTask(Id, task);
         _logger.LogInformation($"Mentor with Id:{Id} updated successfully",Id);
         return Ok(new ApiResponse<LearningTaskResponseDTO>
@@ -86,6 +99,10 @@ public class LearningTaskController : ControllerBase
     [HttpDelete("{Id:guid}")]
     public async Task<IActionResult> deleteLearningTask (Guid Id)
     {
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         bool response = await  _learningtaskservice.DeleteTask(Id);
         if(response) _logger.LogInformation($"Learning Task with Id: {Id} deleted",Id);
     

@@ -41,7 +41,10 @@ public class LearningTaskService: ILearningTaskService
 
     public async Task<LearningTaskResponseDTO> GetById(Guid Id)
     {
-      
+              if (!Guid.TryParse(Convert.ToString(Id), out Guid validId))
+        {
+            throw new BadRequestException("Invalid Id");
+        }
             LearningTask? task = await _context.LearningTasks.FindAsync(Id);
             if(task is null)
             {
@@ -74,7 +77,8 @@ public class LearningTaskService: ILearningTaskService
     
 
     public async Task<LearningTaskResponseDTO> UpdateTask(Guid Id,CreateorUpdateLearningTaskRequestDTO updatedtask)
-    {
+    {        GuidValidation.ValidateGuid(Id);
+       
        
             LearningTask? task = await _context.LearningTasks.FindAsync(Id);
             if(task == null)
@@ -97,7 +101,8 @@ public class LearningTaskService: ILearningTaskService
     }
 
     public async Task<bool> DeleteTask (Guid Id)
-    {
+    {         GuidValidation.ValidateGuid(Id);
+       
        
             LearningTask? task = await _context.LearningTasks.FindAsync(Id);
             if(task == null)

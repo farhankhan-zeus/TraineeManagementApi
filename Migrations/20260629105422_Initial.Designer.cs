@@ -11,8 +11,8 @@ using TraineeManagementApi.Context;
 namespace TraineeManagementApi.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20260619144757_removednavigation")]
-    partial class removednavigation
+    [Migration("20260629105422_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,6 +103,39 @@ namespace TraineeManagementApi.Migrations
                         .IsUnique();
 
                     b.ToTable("Mentors");
+                });
+
+            modelBuilder.Entity("TraineeManagementApi.Models.ProcessingJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("Completed")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ErrorSummary")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("Started")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("ProcessingJob");
                 });
 
             modelBuilder.Entity("TraineeManagementApi.Models.Review", b =>
@@ -199,7 +232,6 @@ namespace TraineeManagementApi.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("checksum")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("generatedName")

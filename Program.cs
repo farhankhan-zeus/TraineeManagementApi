@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi;
 using TraineeManagement.Api.ExceptionMiddlewares;
+using RabbitMQ.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 string MyAllowSpecificOrigins ="_myAllowedSpecificOrigins";
@@ -20,7 +22,7 @@ builder.Services.AddCors(options =>
                       policy  =>
                       {
                           policy.WithOrigins("http://localhost:3000",
-                                              "http://localhost:5173")
+                                              "http://localhost:5173,https://localhost:7235/")
                                 .AllowCredentials();
                       });
 });
@@ -28,26 +30,7 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection String not found");
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddDbContext<ApiContext>( options =>{
-    options.UseMySQL(connectionString)
-    .UseSeeding((ApiContext, _) =>
-    {
-        if (ApiContext.Set<User>().Any() == false)
-        {
-            User newUser= new User{
-                Username="admin",
-                Email="admin@gmail.com",
-                Passwordhash= PasswordHasher.Hashpassword("admin@123"),
-                Role= "Admin",
-                CreatedDate= DateTime.Now,
-                UpdatedDate=DateTime.Now
-            };
-            ApiContext.Set<User>().Add(newUser);
-            ApiContext.SaveChanges();
-        }
-        ;
-    });        
-});
+builder.Services.contextconfiguration(connectionString);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -55,42 +38,15 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration=builder.Configuration.GetConnectionString("RedisConnection");
     options.InstanceName=builder.Configuration.GetConnectionString("RedisInstanceName");
     options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
-    {   EndPoints={"localhost:6379"},
-        ConnectRetry=2,
-        ConnectTimeout=3000,
+    {   EndPoints={builder.Configuration.GetConnectionString("RedisConnection").Split(",")[0]},
+        ConnectRetry=1,
+        ConnectTimeout=2000,
     };
 });
 builder.Services.AddControllers();
-builder.Services.AddScoped<ITraineeService,TraineeService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IMentorService,MentorService>();
-builder.Services.AddScoped<ILearningTaskService,LearningTaskService>();
-builder.Services.AddScoped<ITaskAssignmentService,TaskAssignmentService>();
-builder.Services.AddScoped<ISubmissionService,SubmissionService>();
-builder.Services.AddScoped<IReviewService,ReviewService>();
-builder.Services.AddScoped<IFileStorageService,FileStorageService>();
-builder.Services.AddScoped<IRedisService,RedisService>();
-builder.Services.AddScoped<IRabbitMQService,RabbitMQService>();
+builder.Services.applicationServices();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                ValidAudience = builder.Configuration["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
-            };
-        });
+builder.Services.AuthenticationConfig(builder.Configuration);
 
 builder.Services.AddAuthorization();
 builder.Services.AddProblemDetails(options =>
@@ -102,12 +58,22 @@ builder.Services.AddProblemDetails(options =>
         ctx.ProblemDetails.Instance = $"{ctx.HttpContext.Request.Method} {ctx.HttpContext.Request.Path}";
     };
 });
-
+var rabbitMqSection = builder.Configuration.GetSection("RabbitMQ");
+builder.Services.AddSingleton(sp => new ConnectionFactory()
+{
+    HostName = rabbitMqSection["Host"]!,
+    Port = Convert.ToInt32(rabbitMqSection["Port"]),
+    UserName = rabbitMqSection["UserName"]!,
+    Password = rabbitMqSection["Password"]!,
+    
+});
 
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer<ApiKeySecuritySchemeTransformer>();
 });
+
+builder.Services.AddHealthChecksExtensions(builder.Configuration);
 
 var app = builder.Build();
 
@@ -129,5 +95,23 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks(
+    "/health/live",
+    new HealthCheckOptions
+    {
+        Predicate = _ => false
+    }
+);
+
+app.MapHealthChecks(
+    "/health/ready",
+    new HealthCheckOptions
+    {
+        Predicate = _ => true,
+        ResponseWriter = HealthCheckReporter.WriteHealthCheckResponse
+    }
+);
+
+await app.MigrateDatabse();
 
 app.Run();

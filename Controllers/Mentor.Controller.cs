@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.DTO.MentorDTO;
+using TraineeManagementApi.Exceptions;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Services.Interfaces;
 
@@ -40,6 +41,10 @@ public class MentorController : ControllerBase
     [HttpGet("{Id:guid}")]    
     public async Task<IActionResult> GetById (Guid Id)
     {
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
       
         var result = await _mentorservice.GetById(Id);
         
@@ -59,7 +64,11 @@ public class MentorController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> addMentor( CreateorUpdateMentorRequestDTO mentee)
     {
-        
+
+            if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
             MentorResponseDTO response = await _mentorservice.AddMentor(mentee);
             return Ok( new ApiResponse<MentorResponseDTO>
             {
@@ -74,6 +83,10 @@ public class MentorController : ControllerBase
     [HttpPut("{Id:guid}")]
     public async Task<IActionResult> updateMentor (Guid Id,CreateorUpdateMentorRequestDTO mentee)
     {
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         MentorResponseDTO response = await _mentorservice.UpdateMentor(Id, mentee);
        
             
@@ -91,6 +104,10 @@ public class MentorController : ControllerBase
     [HttpDelete("{Id:guid}")]
     public async Task<IActionResult> deleteMentor (Guid Id)
     {
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         bool response = await  _mentorservice.DeleteMentor(Id);
          if(response) _logger.LogInformation($"Mentor with Id: {Id} deleted",Id);
     

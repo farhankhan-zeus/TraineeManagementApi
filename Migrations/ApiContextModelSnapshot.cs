@@ -102,6 +102,39 @@ namespace TraineeManagementApi.Migrations
                     b.ToTable("Mentors");
                 });
 
+            modelBuilder.Entity("TraineeManagementApi.Models.ProcessingJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("Completed")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ErrorSummary")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("Started")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("ProcessingJob");
+                });
+
             modelBuilder.Entity("TraineeManagementApi.Models.Review", b =>
                 {
                     b.Property<Guid>("Id")
@@ -196,7 +229,6 @@ namespace TraineeManagementApi.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("checksum")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("generatedName")

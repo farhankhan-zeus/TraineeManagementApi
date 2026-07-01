@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagementApi.DTO.ReviewDTO;
+using TraineeManagementApi.Exceptions;
 using TraineeManagementApi.Models;
 using TraineeManagementApi.Services.Interfaces;
 
@@ -41,6 +42,10 @@ public class ReviewController : ControllerBase
     public async Task<IActionResult> GetById (Guid Id)
     {
       
+      if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         var result = await _reviewservice.GetById(Id);
         
         _logger.LogInformation($"Review with Id:{Id} fetched successfully",Id);
@@ -57,7 +62,11 @@ public class ReviewController : ControllerBase
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> AddReview(  CreateorUpdateReviewRequestDTO submission)
-    {
+    {   
+        if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         
             ReviewResponseDTO response = await _reviewservice.AddReview(submission);
             return Ok( new ApiResponse<ReviewResponseDTO>
@@ -73,6 +82,10 @@ public class ReviewController : ControllerBase
     [HttpPut("{Id:guid}/status")]
     public async Task<IActionResult> updateReview(Guid Id,CreateorUpdateReviewRequestDTO updatedsubmission)
     {
+            if (!ModelState.IsValid)
+            {
+                throw new BadRequestException("Invalid Data");
+            }
         ReviewResponseDTO response = await _reviewservice.UpdateReview(Id, updatedsubmission);
        
         _logger.LogInformation($"Review with Id:{Id} updated successfully",Id);

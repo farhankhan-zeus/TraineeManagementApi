@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TraineeManagementApi.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -49,6 +49,24 @@ namespace TraineeManagementApi.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Mentors", x => x.Id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ProcessingJob",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false),
+                    CorrelationId = table.Column<Guid>(type: "char(36)", nullable: false),
+                    Attempts = table.Column<int>(type: "int", nullable: false),
+                    ErrorSummary = table.Column<string>(type: "longtext", nullable: true),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    Started = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    Completed = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProcessingJob", x => x.Id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -190,7 +208,7 @@ namespace TraineeManagementApi.Migrations
                     generatedName = table.Column<string>(type: "longtext", nullable: false),
                     ContentType = table.Column<string>(type: "longtext", nullable: false),
                     size = table.Column<long>(type: "bigint", nullable: false),
-                    checksum = table.Column<string>(type: "longtext", nullable: false),
+                    checksum = table.Column<string>(type: "longtext", nullable: true),
                     UploadedById = table.Column<Guid>(type: "char(36)", nullable: false),
                     SubmissionId = table.Column<Guid>(type: "char(36)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -205,12 +223,6 @@ namespace TraineeManagementApi.Migrations
                         principalTable: "Submission",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SubmissionFile_Trainees_UploadedById",
-                        column: x => x.UploadedById,
-                        principalTable: "Trainees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -223,6 +235,12 @@ namespace TraineeManagementApi.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Mentors_Id",
                 table: "Mentors",
+                column: "Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProcessingJob_Id",
+                table: "ProcessingJob",
                 column: "Id",
                 unique: true);
 
@@ -265,11 +283,6 @@ namespace TraineeManagementApi.Migrations
                 column: "SubmissionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SubmissionFile_UploadedById",
-                table: "SubmissionFile",
-                column: "UploadedById");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_TaskAssignment_Id",
                 table: "TaskAssignment",
                 column: "Id",
@@ -306,6 +319,9 @@ namespace TraineeManagementApi.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ProcessingJob");
+
             migrationBuilder.DropTable(
                 name: "Review");
 

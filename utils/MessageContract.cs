@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using TraineeManagementApi.Models;
 namespace TraineeManagementApi.utils{
     
     
@@ -9,9 +10,7 @@ public class SubmissionProcessingRequest
 {
 
    [Key]
-    public  Guid Id {get ; set ; }= Guid.NewGuid();
-
-    [Required]
+    
     public Guid MessageId {get; set;} =Guid.NewGuid();
     
     [Required]
@@ -24,6 +23,7 @@ public class SubmissionProcessingRequest
     public Guid FileId {get; set;}
 
     [Required]
+    public required SubmissionFile SubmissionFile {get; set;}
    
        public DateTime RequestedAt {get; set;}
     public  string ContractVersion {get; set;} = "v1";
