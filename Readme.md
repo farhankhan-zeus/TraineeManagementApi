@@ -27,37 +27,27 @@ TraineeManagement.Api
 │
 ├── TraineeManagement.Api (Main App)
 │   ├── Controllers
-│   ├── Interfaces
-│   ├── Microservices
+│   ├── Middlewares
+│   ├── DTOs
 │   ├── Properties
 │   ├── Services
-│   ├── Utils
+│   ├── utils
+│   ├── Constants
+│   ├── Context
 │   └── Program.cs
 │
-├── TraineeManagement.Data (Data Reference)
-│   ├── CacheServices
-│   ├── DTOs
-│   ├── Data
-│   ├── Migrations
-│   ├── Models
-│   ├── Validations
-│   └── Utils
 │
-├── TraineeManagement.Messaging (RabbitMQ Extennsion Method)
-│   └── RabbitMQ Contracts
-│
-├── TraineeManagement.WebCommons (Common Functions of the Web)
-│   ├── Configs
-│   ├── Middlewares
-│   └── Utils
-│
-├── TraineeManagement.Worker (Background Worker)
+├── SubmissionProcessor (Background Worker)
 │   ├── Processing
 │   └── Properties
+│   └── Model
+│   └── Constants
+│   └── Service
 │
 ├── TrainingDirectory.Api (Internal Microservice)
 │   ├── Controllers
-│   ├── Interfaces
+│   ├── Model
+│   ├── DTO
 │   ├── Services
 │   └── Properties
 │
