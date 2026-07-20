@@ -12,8 +12,12 @@ using TraineeManagement.Api.ExceptionMiddlewares;
 using RabbitMQ.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
+var originsString = builder.Configuration["AllowedOrigins"] ?? string.Empty;
 string MyAllowSpecificOrigins ="_myAllowedSpecificOrigins";
+var allowedOrigins = originsString
+    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+    .Select(o => o.Trim())
+    .ToArray();
 
 
 builder.Services.AddCors(options =>
@@ -21,9 +25,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy  =>
                       {
-                          policy.WithOrigins("http://localhost:3000",
-                                              "http://localhost:5173,https://localhost:7235/")
-                                .AllowCredentials();
+                        policy.WithOrigins(allowedOrigins).AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                       });
 });
 
@@ -90,7 +94,7 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors(MyAllowSpecificOrigins);
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();

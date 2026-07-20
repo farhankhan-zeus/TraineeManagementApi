@@ -28,11 +28,10 @@ public class AuthService : IAuthService
         _logger=logger;
         _expiresIn = Convert.ToInt32(_config["Jwt:expiresIn"]);
     }
-    private UserDTO MapToUserDTO(User user)
+    private UserLoginResponseDTO MapToUserDTO(User user)
     {
-        return new UserDTO
+        return new UserLoginResponseDTO
         {
-            Id= user.Id,
             Username=user.Username,
             Email=user.Email,
             Role=user.Role
@@ -77,7 +76,7 @@ public class AuthService : IAuthService
             bool isverified =PasswordHasher.VerifyPassword(loginrequest.Password, user.Passwordhash);
             if (isverified)
             {
-                UserDTO validuser=MapToUserDTO(user);
+                UserLoginResponseDTO validuser=MapToUserDTO(user);
                 LoginResponseDTO loginResponse = new LoginResponseDTO
                 {
                     Success=true,

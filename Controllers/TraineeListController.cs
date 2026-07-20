@@ -46,7 +46,7 @@ public class TraineeListController : ControllerBase
     }
 
     // [Authorize]
-    [HttpGet("{Id:guid}")]    
+    [HttpGet("id/{Id:guid}")]    
     public async  Task<IActionResult> GetById(Guid Id,CancellationToken cancellationToken=default)
     {
         // return MapTraineetoDTO(trainees.FirstOrDefault(p=>p.Id==Id));

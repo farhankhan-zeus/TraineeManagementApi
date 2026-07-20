@@ -15,7 +15,7 @@ namespace TraineeManagementApi.DTO.AuthDTO;
 
     public int? expiresIn {get ; set ;}
 
-    public UserDTO? User {get ; set ;}
+    public UserLoginResponseDTO? User {get ; set ;}
 
 
 
