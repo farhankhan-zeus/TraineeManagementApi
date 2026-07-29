@@ -55,7 +55,11 @@ public class GlobalExceptionMiddleware
                 }
                 if(mysqlEx.Number == 1062) // Foreign key constraint failure on insert or update
                 {
-                    await WriteResponse(context,StatusCodes.Status400BadRequest, "Username Already Exists");
+                    await WriteResponse(context,StatusCodes.Status400BadRequest, "Foreign Key failure");
+                }
+                else
+                {
+                     await WriteResponse(context,StatusCodes.Status400BadRequest, "SQL Error");
                 }
                     
             }
