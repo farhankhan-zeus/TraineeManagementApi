@@ -44,7 +44,7 @@ public class SubmissionService : ISubmissionService
           GuidValidation.ValidateGuid(stringId);
         
         string _keyPrefix = $"{typeof(Submission).Name}:";
-            string validKey= _keyPrefix+":"+stringId;
+            string validKey= _keyPrefix+stringId;
         
         Submission? submission = await _redisservice.GetorSetAsync(validKey,async () =>
         {
@@ -120,7 +120,7 @@ public class SubmissionService : ISubmissionService
             }
             await _context.SaveChangesAsync(cancellationToken);
              string _keyPrefix = $"{typeof(Submission).Name}:";
-            string validKey= _keyPrefix+":"+stringId;
+            string validKey= _keyPrefix+stringId;
             await _redisservice.InvalidateAsync<Submission>(validKey,cancellationToken);
        
             return ResponseDTOMapper.MaptoSubmissionResponse(existsubmission);

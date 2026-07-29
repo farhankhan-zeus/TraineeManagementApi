@@ -64,7 +64,7 @@ public class ReviewService : IReviewService
         }
         
         Mentor? mentor = await _context.Mentors.FindAsync(review.MentorId);
-        if(existSubmission == null)
+        if(mentor == null)
         {
             throw new NotFoundException("Mentor",review.MentorId);
         }
@@ -112,7 +112,7 @@ public class ReviewService : IReviewService
                existreview.ReviewedStatus = review.ReviewedStatus;
             if (existreview.Score != null)
             {
-               existreview.Score = existreview.Score;
+               existreview.Score = review.Score;
             }
             await _context.SaveChangesAsync();
             return ResponseDTOMapper.MaptoReviewResponse(existreview);

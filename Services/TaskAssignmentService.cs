@@ -54,7 +54,7 @@ public class TaskAssignmentService : ITaskAssignmentService
             string stringId=Id.ToString();
             GuidValidation.ValidateGuid(stringId);
             string _keyPrefix = $"{typeof(TaskAssignment).Name}:";
-            string validKey= _keyPrefix+":"+stringId;
+            string validKey= _keyPrefix+stringId;
             
             TaskAssignment? task = await _redisService.GetorSetAsync(validKey, async () =>
             {
@@ -131,7 +131,7 @@ public class TaskAssignmentService : ITaskAssignmentService
             CancellationToken cancellationToken = default;
             await _redisService.InvalidateAsync<List<TaskAssignment>>(AllTaskAssignmentKey,cancellationToken);
              string _keyPrefix = $"{typeof(TaskAssignment).Name}:";
-            string validKey= _keyPrefix+":"+stringId;
+            string validKey= _keyPrefix+stringId;
             await _redisService.InvalidateAsync<TaskAssignment>(validKey,cancellationToken);
             return ResponseDTOMapper.MaptoTaskAssignmentResponse(newTask);
 
@@ -152,7 +152,7 @@ public class TaskAssignmentService : ITaskAssignmentService
             CancellationToken cancellationToken = default;
             await _redisService.InvalidateAsync<List<TaskAssignment>>(AllTaskAssignmentKey,cancellationToken);
              string _keyPrefix = $"{typeof(TaskAssignment).Name}:";
-            string validKey= _keyPrefix+":"+stringId;
+            string validKey= _keyPrefix+stringId;
             await _redisService.InvalidateAsync<TaskAssignment>(validKey,cancellationToken);
             return true;
 

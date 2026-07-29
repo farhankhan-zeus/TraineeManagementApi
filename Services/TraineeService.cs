@@ -59,7 +59,7 @@ public class TraineeService : ITraineeService
         string stringId = Id.ToString();
        GuidValidation.ValidateGuid(stringId);
         string _keyPrefix = $"{typeof(Trainee).Name}:";
-            string validKey= _keyPrefix+":"+stringId;
+            string validKey= _keyPrefix+stringId;
         Trainee? result = await _redisservice.GetorSetAsync<Trainee?>(validKey,async () =>
         {
             
@@ -113,7 +113,7 @@ public class TraineeService : ITraineeService
 
        await _context.SaveChangesAsync(cancellationToken);
         string _keyPrefix = $"{typeof(Trainee).Name}:";
-            string validKey= _keyPrefix+":"+stringId;
+            string validKey= _keyPrefix+stringId;
         await _redisservice.InvalidateAsync<Trainee>(validKey,cancellationToken);
         return ResponseDTOMapper.MapTraineetoDTO(atrainee);
        
@@ -132,7 +132,7 @@ public class TraineeService : ITraineeService
        await _context.SaveChangesAsync(cancellationToken);
        
         string _keyPrefix = $"{typeof(Trainee).Name}:";
-            string validKey= _keyPrefix+":"+stringId;
+            string validKey= _keyPrefix+stringId;
         await _redisservice.InvalidateAsync<Trainee>(validKey,cancellationToken);
         return true;
        

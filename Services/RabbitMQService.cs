@@ -25,9 +25,7 @@ public class RabbitMQService:IRabbitMQService
        
               
         // _connection.AutomaticRecoveryEnabled=true;
-        IConnection connection = await _connection.CreateConnectionAsync();
-        
-        
+        IConnection connection = await _connection.CreateConnectionAsync();      
         using var Channel = await connection.CreateChannelAsync();
          await Channel.QueueDeclareAsync(
             queue: RabbitMQConstants.QUEUE_NAME,
@@ -59,6 +57,7 @@ public class RabbitMQService:IRabbitMQService
         }
 
        await Channel.CloseAsync(cancellationToken);
+       await connection.CloseAsync(cancellationToken);
        
         
      
